@@ -124,10 +124,10 @@ function formatPrice(price) {
 }
 
 // ── Brevo Email Sending ────────────────────────────────────────
-function sendBrevoEmail(apiKey, toEmail, toName, subject, htmlContent, senderName) {
+function sendBrevoEmail(apiKey, toEmail, toName, subject, htmlContent, senderName, senderEmail) {
   const url = 'https://api.brevo.com/v3/smtp/email';
   const payload = {
-    sender: { name: senderName || 'PropCRM', email: 'noreply@propcrm.com' },
+    sender: { name: senderName || 'PropCRM', email: senderEmail || 'noreply@propcrm.com' },
     to: [{ email: toEmail, name: toName || '' }],
     subject: subject,
     htmlContent: htmlContent,
@@ -354,7 +354,8 @@ function handleSubmitLead(data) {
       name,
       'Thank you for your interest, ' + name + '!',
       getLeadAcknowledgmentEmail(name, area, price),
-      config.agentName || 'PropCRM'
+      config.agentName || 'PropCRM',
+      config.agentEmail
     );
     emailSent = ackResult.success;
 
@@ -371,7 +372,8 @@ function handleSubmitLead(data) {
         config.agentName,
         '🏠 New Lead: ' + name + ' — ' + formatPrice(price) + ' in ' + area,
         getAgentNotificationEmail(name, email, area, price),
-        'PropCRM Notifications'
+        'PropCRM Notifications',
+        config.agentEmail
       );
     }
   }
@@ -448,7 +450,8 @@ function handleSendEmailToLead(data) {
         leadName,
         'Regarding your property inquiry — ' + config.agentName,
         getFollowUpEmail(leadName, area, price, config.agentName),
-        config.agentName || 'PropCRM'
+        config.agentName || 'PropCRM',
+        config.agentEmail
       );
 
       return jsonResponse({
@@ -598,7 +601,8 @@ function checkUncontactedLeads() {
             config.agentName,
             '⏰ Reminder: ' + leadName + ' hasn\'t been contacted yet',
             getAgentReminderEmail(leadName, leadEmail, area, price, hoursAgo),
-            'PropCRM Reminders'
+            'PropCRM Reminders',
+            config.agentEmail
           );
 
           if (result.success) {
