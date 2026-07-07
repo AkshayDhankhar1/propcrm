@@ -656,7 +656,7 @@ function setupSheets() {
   const existingData = configSheet.getRange('A2').getValue();
   if (!existingData) {
     configSheet.getRange('A2:E2').setValues([[
-      'Your Name', 'your.email@example.com', '', '1234', 1
+      'Your Name', 'akshay.dhankhar.ji@gmail.com', '', '1234', 1
     ]]);
   }
 
