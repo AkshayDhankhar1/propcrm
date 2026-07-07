@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="PropCRM Agent Dashboard — Manage your property leads, track follow-ups, and view analytics.">
+  <meta name="robots" content="noindex, nofollow">
+  <title>PropCRM — Agent Dashboard</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/dashboard.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+</head>
+<body>
+
+  <!-- ═══════════════ PIN LOGIN OVERLAY ═══════════════ -->
+  <div class="pin-overlay" id="pin-overlay">
+    <div class="pin-card">
+      <div class="pin-icon">🔒</div>
+      <h2>Agent Dashboard</h2>
+      <p class="pin-subtitle">Enter your PIN to access the dashboard</p>
+      <form id="pin-form">
+        <input
+          type="password"
+          class="pin-input"
+          id="pin-input"
+          placeholder="• • • •"
+          maxlength="20"
+          autocomplete="off"
+          autofocus
+        >
+        <div class="pin-error" id="pin-error"></div>
+        <button type="submit" class="btn-pin-submit" id="btn-pin-submit">
+          <span class="btn-text">Login</span>
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══════════════ DASHBOARD ═══════════════ -->
+  <div class="dashboard-page" id="dashboard-page" style="display:none;">
+
+    <!-- Top Nav -->
+    <nav class="dashboard-nav">
+      <div class="nav-brand">
+        <div class="brand-icon">🏠</div>
+        <div>
+          <h1>PropCRM</h1>
+          <span class="nav-subtitle">Agent Dashboard</span>
+        </div>
+      </div>
+      <div class="nav-actions">
+        <span class="nav-agent" id="nav-agent-name"></span>
+        <button class="btn-refresh" id="btn-refresh" title="Refresh data">
+          ↻ Refresh
+        </button>
+        <button class="btn-logout" id="btn-logout" title="Logout">
+          ⏻ Logout
+        </button>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="dashboard-content">
+
+      <!-- Stats Cards -->
+      <section class="stats-grid" id="stats-grid">
+        <div class="stat-card" id="stat-total">
+          <div class="stat-icon icon-total">📊</div>
+          <div class="stat-value" id="stat-total-value">—</div>
+          <div class="stat-label">Total Leads</div>
+        </div>
+        <div class="stat-card" id="stat-contacted">
+          <div class="stat-icon icon-contacted">✅</div>
+          <div class="stat-value" id="stat-contacted-value">—</div>
+          <div class="stat-label">Contacted %</div>
+        </div>
+        <div class="stat-card" id="stat-pending">
+          <div class="stat-icon icon-pending">⏳</div>
+          <div class="stat-value" id="stat-pending-value">—</div>
+          <div class="stat-label">Uncontacted</div>
+        </div>
+        <div class="stat-card" id="stat-price">
+          <div class="stat-icon icon-price">💰</div>
+          <div class="stat-value" id="stat-price-value">—</div>
+          <div class="stat-label">Avg. Budget</div>
+        </div>
+      </section>
+
+      <!-- Charts -->
+      <section class="charts-grid" id="charts-grid">
+        <!-- Price Distribution Chart -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <h3 class="chart-title">Price Bracket Distribution</h3>
+              <p class="chart-subtitle">Where are leads concentrated?</p>
+            </div>
+          </div>
+          <div class="chart-container" id="price-chart-container">
+            <canvas id="price-chart"></canvas>
+          </div>
+        </div>
+
+        <!-- Area Distribution Chart -->
+        <div class="chart-card">
+          <div class="chart-header">
+            <div>
+              <h3 class="chart-title">Top Localities</h3>
+              <p class="chart-subtitle">Most searched areas by leads</p>
+            </div>
+          </div>
+          <div class="chart-container" id="area-chart-container">
+            <canvas id="area-chart"></canvas>
+          </div>
+        </div>
+      </section>
+
+      <!-- Leads Table -->
+      <section class="table-section">
+        <div class="table-card">
+          <div class="table-header">
+            <h3 class="table-title">All Leads</h3>
+            <span class="table-count" id="table-count">0 leads</span>
+          </div>
+          <div class="table-wrapper">
+            <table class="leads-table" id="leads-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Area</th>
+                  <th>Budget</th>
+                  <th>Date</th>
+                  <th>Contacted</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="leads-tbody">
+                <!-- Dynamic rows -->
+              </tbody>
+            </table>
+          </div>
+          <!-- Empty State -->
+          <div class="table-empty" id="table-empty" style="display:none;">
+            <div class="table-empty-icon">📭</div>
+            <h3>No leads yet</h3>
+            <p>Leads will appear here when customers submit the inquiry form.</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </div>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>

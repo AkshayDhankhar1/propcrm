@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>User Flows &amp; System Triggers — PropCRM</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --primary: #1B5E20;
+    --primary-light: #4CAF50;
+    --accent: #E8F5E9;
+    --bg: #FFFFFF;
+    --text: #1a1a1a;
+    --text-muted: #555;
+    --border: #E0E0E0;
+    --header-bg: #1B5E20;
+    --header-text: #FFFFFF;
+    --customer: #1565C0;
+    --customer-bg: #E3F2FD;
+    --agent: #2E7D32;
+    --agent-bg: #E8F5E9;
+    --system: #6A1B9A;
+    --system-bg: #F3E5F5;
+    --trigger: #E65100;
+    --trigger-bg: #FFF3E0;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Inter', -apple-system, sans-serif; font-size: 11pt; line-height: 1.7; color: var(--text); background: var(--bg); }
+
+  @page { size: A4; margin: 20mm 18mm 25mm 18mm; }
+  @media print {
+    body { font-size: 10pt; }
+    .page-break { page-break-before: always; }
+    .no-break { page-break-inside: avoid; }
+    .cover { page-break-after: always; }
+  }
+
+  .cover { display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 90vh; text-align: center; padding: 60px 40px; }
+  .cover .logo-bar { width: 80px; height: 6px; background: var(--primary); border-radius: 3px; margin-bottom: 40px; }
+  .cover h1 { font-size: 32pt; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+  .cover .subtitle { font-size: 14pt; color: var(--text-muted); margin-bottom: 50px; }
+  .cover .doc-type { font-size: 13pt; font-weight: 600; color: var(--primary); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 60px; }
+  .cover .meta-table { width: 360px; border-collapse: collapse; text-align: left; }
+  .cover .meta-table td { padding: 8px 16px; font-size: 10pt; border-bottom: 1px solid #eee; }
+  .cover .meta-table td:first-child { font-weight: 600; color: var(--text-muted); width: 140px; }
+  .cover .confidential { margin-top: 60px; font-size: 8.5pt; color: #999; text-transform: uppercase; letter-spacing: 2px; }
+
+  .content { max-width: 780px; margin: 0 auto; padding: 40px 20px; }
+  h2 { font-size: 18pt; font-weight: 700; color: var(--primary); margin-top: 40px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); }
+  h3 { font-size: 13pt; font-weight: 600; color: #333; margin-top: 28px; margin-bottom: 10px; }
+  h4 { font-size: 11pt; font-weight: 600; color: var(--primary); margin-top: 20px; margin-bottom: 8px; }
+  p { margin-bottom: 12px; }
+  ul, ol { margin: 8px 0 16px 24px; }
+  li { margin-bottom: 6px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0 24px 0; font-size: 10pt; }
+  th { background: var(--header-bg); color: var(--header-text); font-weight: 600; text-align: left; padding: 10px 14px; font-size: 9.5pt; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) { background: #FAFAFA; }
+
+  /* Actor Badges */
+  .actor-badge {
+    display: inline-block;
+    padding: 3px 12px;
+    border-radius: 14px;
+    font-size: 8.5pt;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+  .actor-customer { background: var(--customer-bg); color: var(--customer); }
+  .actor-agent { background: var(--agent-bg); color: var(--agent); }
+  .actor-system { background: var(--system-bg); color: var(--system); }
+  .actor-trigger { background: var(--trigger-bg); color: var(--trigger); }
+
+  /* Flow Cards */
+  .flow-card {
+    background: #FAFFFE;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 28px;
+    margin: 24px 0;
+    border-top: 4px solid var(--primary);
+  }
+
+  .flow-card.customer-flow { border-top-color: var(--customer); }
+  .flow-card.agent-flow { border-top-color: var(--agent); }
+  .flow-card.system-flow { border-top-color: var(--system); }
+
+  .flow-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eee;
+  }
+
+  .flow-header h3 { margin: 0; font-size: 14pt; }
+  .flow-meta { font-size: 9pt; color: var(--text-muted); text-align: right; }
+
+  .swimlane {
+    display: grid;
+    grid-template-columns: 100px 1fr;
+    gap: 0;
+    margin: 16px 0;
+  }
+
+  .swimlane-label {
+    font-size: 8.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 12px 8px;
+    border-right: 2px solid #ddd;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    writing-mode: vertical-lr;
+    transform: rotate(180deg);
+  }
+
+  .swimlane-label.customer-lane { background: var(--customer-bg); color: var(--customer); border-right-color: var(--customer); }
+  .swimlane-label.agent-lane { background: var(--agent-bg); color: var(--agent); border-right-color: var(--agent); }
+  .swimlane-label.system-lane { background: var(--system-bg); color: var(--system); border-right-color: var(--system); }
+
+  .flow-step-inline {
+    display: flex;
+    align-items: flex-start;
+    padding: 14px 20px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  .step-num {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 11pt;
+    flex-shrink: 0;
+    margin-right: 14px;
+    color: white;
+  }
+
+  .step-num.customer { background: var(--customer); }
+  .step-num.agent { background: var(--agent); }
+  .step-num.system { background: var(--system); }
+
+  .step-body { flex: 1; }
+  .step-body strong { font-size: 10.5pt; display: block; margin-bottom: 2px; }
+  .step-body .detail { font-size: 9.5pt; color: var(--text-muted); }
+
+  .condition-box {
+    background: #FFF8E1;
+    border: 1px solid #FFE082;
+    border-radius: 6px;
+    padding: 10px 16px;
+    margin: 8px 0 8px 42px;
+    font-size: 9.5pt;
+  }
+
+  .condition-box .label {
+    font-weight: 700;
+    color: #F57F17;
+    text-transform: uppercase;
+    font-size: 8pt;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+
+  /* Trigger Matrix */
+  .trigger-row td:first-child {
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .callout {
+    padding: 16px 20px;
+    border-left: 4px solid var(--primary);
+    background: var(--accent);
+    border-radius: 0 6px 6px 0;
+    margin: 16px 0;
+    font-size: 10pt;
+  }
+
+  .state-diagram {
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 24px;
+    margin: 20px 0;
+    text-align: center;
+  }
+
+  .state-flow {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin: 12px 0;
+  }
+
+  .state-box {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 10pt;
+    border: 2px solid;
+  }
+
+  .state-new { background: #E3F2FD; border-color: #1565C0; color: #1565C0; }
+  .state-notified { background: #F3E5F5; border-color: #6A1B9A; color: #6A1B9A; }
+  .state-reminded { background: #FFF3E0; border-color: #E65100; color: #E65100; }
+  .state-contacted { background: #E8F5E9; border-color: #2E7D32; color: #2E7D32; }
+
+  .state-arrow {
+    font-size: 18pt;
+    color: #999;
+  }
+
+  .state-label {
+    font-size: 8pt;
+    color: var(--text-muted);
+    display: block;
+    margin-top: 2px;
+  }
+
+  .footer-note {
+    margin-top: 60px; padding-top: 16px; border-top: 1px solid #ddd;
+    font-size: 8.5pt; color: #999; text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover">
+  <div class="logo-bar"></div>
+  <h1>PropCRM</h1>
+  <p class="subtitle">Lead Management System for Real Estate Agents</p>
+  <p class="doc-type">User Flows &amp; System Triggers</p>
+  <table class="meta-table">
+    <tr><td>Document Version</td><td>1.0</td></tr>
+    <tr><td>Date</td><td>July 7, 2026</td></tr>
+    <tr><td>Status</td><td>Draft — Pending Approval</td></tr>
+    <tr><td>Author</td><td>Product Engineering Team</td></tr>
+    <tr><td>Related Documents</td><td>PRD v1.0, Data Flow v1.0</td></tr>
+  </table>
+  <p class="confidential">Confidential — Internal Use Only</p>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+<h2>1. Document Purpose</h2>
+<p>This document defines the complete user flows for both actors (Customer and Agent) within the PropCRM system, along with all automated system triggers and their conditions. It serves as the definitive reference for understanding <strong>who does what, when, and what happens as a result</strong>.</p>
+
+<h3>1.1 Actors</h3>
+<table>
+  <thead><tr><th>Actor</th><th>Type</th><th>Description</th></tr></thead>
+  <tbody>
+    <tr><td><span class="actor-badge actor-customer">Customer</span></td><td>Human — External</td><td>A property seeker who submits an inquiry through the lead form</td></tr>
+    <tr><td><span class="actor-badge actor-agent">Agent</span></td><td>Human — Internal</td><td>The real estate agent who manages leads through the dashboard</td></tr>
+    <tr><td><span class="actor-badge actor-system">System</span></td><td>Automated</td><td>PropCRM backend (Google Apps Script) — executes business logic, sends emails</td></tr>
+    <tr><td><span class="actor-badge actor-trigger">Scheduler</span></td><td>Automated</td><td>Time-driven trigger in Apps Script — runs periodic tasks</td></tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- 2. Customer User Flows -->
+<h2>2. Customer User Flows</h2>
+
+<!-- Flow 2.1 -->
+<div class="flow-card customer-flow">
+  <div class="flow-header">
+    <h3>Flow 2.1: Submit Property Inquiry</h3>
+    <div class="flow-meta">
+      Actor: <span class="actor-badge actor-customer">Customer</span><br>
+      Entry Point: Lead Form URL<br>
+      Est. Duration: 30–60 seconds
+    </div>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num customer">1</div>
+    <div class="step-body">
+      <strong>Customer Opens Lead Form</strong>
+      <span class="detail">Customer navigates to the PropCRM lead form URL (hosted on GitHub Pages). The page loads with a clean, glassmorphism-styled form on a cream-green background.</span>
+    </div>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num customer">2</div>
+    <div class="step-body">
+      <strong>Customer Fills Form Fields</strong>
+      <span class="detail">Customer enters their <strong>Full Name</strong>, <strong>Email Address</strong>, <strong>Property Area</strong> (locality — free text), and <strong>Property Price</strong> (budget in ₹). Each field validates in real-time as the user types or moves focus.</span>
+    </div>
+  </div>
+
+  <div class="condition-box">
+    <div class="label">⚡ Condition: Client-Side Validation</div>
+    <ul style="margin: 4px 0 0 16px; font-size: 9pt;">
+      <li><strong>IF</strong> Name is empty or &lt; 2 characters → Show error: "Please enter your full name (min 2 characters)"</li>
+      <li><strong>IF</strong> Email format is invalid → Show error: "Please enter a valid email address"</li>
+      <li><strong>IF</strong> Area is empty → Show error: "Please enter the property area/locality"</li>
+      <li><strong>IF</strong> Price is empty, zero, or negative → Show error: "Please enter a valid property price"</li>
+      <li><strong>IF</strong> any validation fails → Submit button remains disabled / submission is blocked</li>
+    </ul>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num customer">3</div>
+    <div class="step-body">
+      <strong>Customer Clicks "Submit Inquiry"</strong>
+      <span class="detail">Submit button changes to a loading state (spinner animation). The button is disabled to prevent double submission. Form data is serialized as JSON.</span>
+    </div>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num system">4</div>
+    <div class="step-body">
+      <strong>[SYSTEM] Processes Submission</strong>
+      <span class="detail">Data is sent to Google Apps Script via HTTPS POST. Server-side validation runs. If valid: lead is saved to Google Sheets, acknowledgment email is sent to the customer, notification email is sent to the agent. <em>(See Data Flow Document — Flow 1 for full details)</em></span>
+    </div>
+  </div>
+
+  <div class="condition-box">
+    <div class="label">⚡ Condition: Submission Result</div>
+    <ul style="margin: 4px 0 0 16px; font-size: 9pt;">
+      <li><strong>IF</strong> success → Go to Step 5a (Success)</li>
+      <li><strong>IF</strong> server validation error → Go to Step 5b (Validation Error)</li>
+      <li><strong>IF</strong> network/server error → Go to Step 5c (System Error)</li>
+    </ul>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num customer">5a</div>
+    <div class="step-body">
+      <strong>Success: Confirmation Displayed</strong>
+      <span class="detail">A green success toast appears: <em>"Thank you! Your inquiry has been submitted. Our agent will contact you shortly."</em> Form fields are cleared. Customer can submit another inquiry.</span>
+    </div>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num customer">5b</div>
+    <div class="step-body">
+      <strong>Validation Error: Errors Displayed</strong>
+      <span class="detail">An error toast appears with the server-returned validation errors. Form data is preserved — the customer corrects the errors and re-submits.</span>
+    </div>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num customer">5c</div>
+    <div class="step-body">
+      <strong>System Error: Retry Prompt</strong>
+      <span class="detail">An error toast appears: <em>"Something went wrong. Please try again."</em> Form data is preserved. Submit button is re-enabled for retry.</span>
+    </div>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num customer">6</div>
+    <div class="step-body">
+      <strong>Customer Receives Acknowledgment Email</strong>
+      <span class="detail">Within 60 seconds, the customer receives an email from PropCRM confirming their inquiry was received, with a summary of their submitted details. <em>(Sent via Brevo API from Apps Script)</em></span>
+    </div>
+  </div>
+</div>
+
+<!-- Flow 2.2: Customer Receives Follow-up -->
+<div class="flow-card customer-flow">
+  <div class="flow-header">
+    <h3>Flow 2.2: Customer Receives Follow-up Email</h3>
+    <div class="flow-meta">
+      Actor: <span class="actor-badge actor-customer">Customer</span> (passive)<br>
+      Trigger: Agent sends email from dashboard
+    </div>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num agent">1</div>
+    <div class="step-body">
+      <strong>[AGENT] Clicks "Send Email" on Dashboard</strong>
+      <span class="detail">Agent identifies a lead in the dashboard table and clicks the "Send Email" action button.</span>
+    </div>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num system">2</div>
+    <div class="step-body">
+      <strong>[SYSTEM] Sends Follow-up Email via Brevo</strong>
+      <span class="detail">Apps Script constructs a follow-up email using a predefined template, personalized with the lead's name, area, and price. The email is sent via Brevo API to the lead's email address.</span>
+    </div>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num customer">3</div>
+    <div class="step-body">
+      <strong>Customer Receives Follow-up Email</strong>
+      <span class="detail">The customer receives a professional follow-up email from the agent regarding their property inquiry. The email includes the agent's name and contact details.</span>
+    </div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- 3. Agent User Flows -->
+<h2>3. Agent User Flows</h2>
+
+<!-- Flow 3.1: Login -->
+<div class="flow-card agent-flow">
+  <div class="flow-header">
+    <h3>Flow 3.1: Dashboard Login</h3>
+    <div class="flow-meta">
+      Actor: <span class="actor-badge actor-agent">Agent</span><br>
+      Entry Point: Dashboard URL<br>
+      Est. Duration: 5–10 seconds
+    </div>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num agent">1</div>
+    <div class="step-body">
+      <strong>Agent Opens Dashboard URL</strong>
+      <span class="detail">Agent navigates to the dashboard page. A PIN login overlay/modal is displayed covering all dashboard content.</span>
+    </div>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num agent">2</div>
+    <div class="step-body">
+      <strong>Agent Enters PIN</strong>
+      <span class="detail">Agent types their numeric PIN in the input field and clicks "Login" (or presses Enter).</span>
+    </div>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num system">3</div>
+    <div class="step-body">
+      <strong>[SYSTEM] Verifies PIN</strong>
+      <span class="detail">PIN is sent to Apps Script via POST. Apps Script compares it against the PIN stored in AgentConfig sheet.</span>
+    </div>
+  </div>
+
+  <div class="condition-box">
+    <div class="label">⚡ Condition: PIN Verification Result</div>
+    <ul style="margin: 4px 0 0 16px; font-size: 9pt;">
+      <li><strong>IF</strong> PIN matches → Login overlay is removed. Dashboard loads with full data. Go to Flow 3.2.</li>
+      <li><strong>IF</strong> PIN does not match → Error message: "Invalid PIN. Please try again." PIN input is cleared. Agent retries.</li>
+    </ul>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num agent">4</div>
+    <div class="step-body">
+      <strong>Dashboard Loads</strong>
+      <span class="detail">Upon successful login, the system fetches all leads data and renders the complete dashboard: stats cards, charts, and leads table. The PIN is stored in a JavaScript variable (session memory) for subsequent API calls.</span>
+    </div>
+  </div>
+</div>
+
+<!-- Flow 3.2: View Leads & Analytics -->
+<div class="flow-card agent-flow">
+  <div class="flow-header">
+    <h3>Flow 3.2: View Leads &amp; Analytics</h3>
+    <div class="flow-meta">
+      Actor: <span class="actor-badge actor-agent">Agent</span><br>
+      Prerequisite: Successful login (Flow 3.1)
+    </div>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num system">1</div>
+    <div class="step-body">
+      <strong>[SYSTEM] Fetches &amp; Renders Data</strong>
+      <span class="detail">GET request to Apps Script with PIN. System returns all leads + aggregated stats. Dashboard renders:</span>
+    </div>
+  </div>
+
+  <div style="margin-left: 42px; margin-bottom: 16px;">
+    <table>
+      <thead><tr><th>Component</th><th>Data Displayed</th><th>Visual Style</th></tr></thead>
+      <tbody>
+        <tr><td>Stat Card 1</td><td>Total Leads (count)</td><td>Large number with icon</td></tr>
+        <tr><td>Stat Card 2</td><td>Contacted % (percentage)</td><td>Circular progress or percentage</td></tr>
+        <tr><td>Stat Card 3</td><td>Uncontacted (count)</td><td>Highlighted if > 0 (attention needed)</td></tr>
+        <tr><td>Stat Card 4</td><td>Average Property Price (₹)</td><td>Formatted currency</td></tr>
+        <tr><td>Chart 1</td><td>Price Bracket Distribution</td><td>Doughnut chart with green gradient + % labels</td></tr>
+        <tr><td>Chart 2</td><td>Area/Locality Distribution</td><td>Horizontal bar chart with green gradient</td></tr>
+        <tr><td>Leads Table</td><td>All leads with details</td><td>Sortable table with action buttons</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num agent">2</div>
+    <div class="step-body">
+      <strong>Agent Reviews Dashboard</strong>
+      <span class="detail">Agent scans stat cards for quick summary, reviews charts for market insight, and scrolls through the leads table. Agent can click "Refresh" at any time to fetch the latest data.</span>
+    </div>
+  </div>
+</div>
+
+<!-- Flow 3.3: Mark Lead as Contacted -->
+<div class="flow-card agent-flow">
+  <div class="flow-header">
+    <h3>Flow 3.3: Mark Lead as Contacted</h3>
+    <div class="flow-meta">
+      Actor: <span class="actor-badge actor-agent">Agent</span><br>
+      Prerequisite: Dashboard loaded
+    </div>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num agent">1</div>
+    <div class="step-body">
+      <strong>Agent Checks the "Contacted" Checkbox</strong>
+      <span class="detail">In the leads table, the agent clicks the checkbox next to a lead they have contacted. The checkbox immediately shows a loading state.</span>
+    </div>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num system">2</div>
+    <div class="step-body">
+      <strong>[SYSTEM] Updates Lead Status</strong>
+      <span class="detail">POST request sent to Apps Script with <code>action: "updateContacted"</code>, the lead ID, and <code>contacted: true</code>. Apps Script finds the row in Google Sheets and sets <code>contacted = TRUE</code>, <code>contactedAt = current timestamp</code>.</span>
+    </div>
+  </div>
+
+  <div class="condition-box">
+    <div class="label">⚡ Condition: Update Result</div>
+    <ul style="margin: 4px 0 0 16px; font-size: 9pt;">
+      <li><strong>IF</strong> success → Checkbox shows checked state. Row may visually update (subtle green tint). Stats cards re-calculate (Contacted % increases, Uncontacted count decreases).</li>
+      <li><strong>IF</strong> failure → Checkbox reverts to unchecked. Error toast shown: "Failed to update. Please try again."</li>
+    </ul>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num agent">3</div>
+    <div class="step-body">
+      <strong>Agent Can Uncheck (Reverse Contact Status)</strong>
+      <span class="detail">If the agent unchecks the checkbox, the same flow runs in reverse — <code>contacted</code> is set back to <code>FALSE</code> and <code>contactedAt</code> is cleared.</span>
+    </div>
+  </div>
+</div>
+
+<!-- Flow 3.4: Send Email to Lead -->
+<div class="flow-card agent-flow">
+  <div class="flow-header">
+    <h3>Flow 3.4: Send Follow-up Email to Lead</h3>
+    <div class="flow-meta">
+      Actor: <span class="actor-badge actor-agent">Agent</span><br>
+      Prerequisite: Dashboard loaded
+    </div>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num agent">1</div>
+    <div class="step-body">
+      <strong>Agent Clicks "Send Email" Button</strong>
+      <span class="detail">In the leads table, the agent clicks the "Send Email" action button on the row of the lead they wish to follow up with. The button changes to a loading spinner.</span>
+    </div>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num system">2</div>
+    <div class="step-body">
+      <strong>[SYSTEM] Sends Follow-up Email</strong>
+      <span class="detail">POST request sent with the lead ID. Apps Script retrieves the lead's data and the agent's name from config. A predefined follow-up email template is populated and sent to the lead's email via Brevo API.</span>
+    </div>
+  </div>
+
+  <div class="condition-box">
+    <div class="label">⚡ Condition: Email Send Result</div>
+    <ul style="margin: 4px 0 0 16px; font-size: 9pt;">
+      <li><strong>IF</strong> email sent successfully → Button shows ✓ "Sent" state for 3 seconds, then reverts to normal.</li>
+      <li><strong>IF</strong> email fails → Button shows ✗ "Failed" state. Error toast: "Email could not be sent. Please check your Brevo configuration."</li>
+    </ul>
+  </div>
+</div>
+
+<!-- Flow 3.5: Receive Notification -->
+<div class="flow-card agent-flow">
+  <div class="flow-header">
+    <h3>Flow 3.5: Agent Receives New Lead Notification</h3>
+    <div class="flow-meta">
+      Actor: <span class="actor-badge actor-agent">Agent</span> (passive)<br>
+      Trigger: New lead submitted
+    </div>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num customer">1</div>
+    <div class="step-body">
+      <strong>[CUSTOMER] Submits Lead Form</strong>
+      <span class="detail">A customer fills out and submits the lead form.</span>
+    </div>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num system">2</div>
+    <div class="step-body">
+      <strong>[SYSTEM] Sends Notification Email to Agent</strong>
+      <span class="detail">As part of the lead submission flow, Apps Script sends an email to the agent's email (from AgentConfig) with the lead's details: name, email, area, price, and a link to the dashboard.</span>
+    </div>
+  </div>
+
+  <div class="flow-step-inline">
+    <div class="step-num agent">3</div>
+    <div class="step-body">
+      <strong>Agent Reviews Email Notification</strong>
+      <span class="detail">Agent receives the email in their inbox. They can see the lead's details and choose to either contact the lead directly or open the dashboard for full management.</span>
+    </div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- 4. Automated System Triggers -->
+<h2>4. Automated System Triggers</h2>
+
+<p>These are actions performed by the system <strong>without any human intervention</strong>. They are triggered by events or scheduled timers.</p>
+
+<!-- Flow 4.1: New Lead Processing -->
+<div class="flow-card system-flow">
+  <div class="flow-header">
+    <h3>Trigger 4.1: New Lead Submitted (Event-Driven)</h3>
+    <div class="flow-meta">
+      Type: <span class="actor-badge actor-system">Event Trigger</span><br>
+      Fires: Immediately on form submit
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>Property</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Event</strong></td><td>Customer submits the lead form (POST <code>submitLead</code>)</td></tr>
+      <tr><td><strong>Condition</strong></td><td>Server-side validation passes (all fields valid)</td></tr>
+      <tr><td><strong>Actions Executed</strong></td><td>
+        <ol style="margin: 0; padding-left: 16px;">
+          <li>Generate UUID and timestamp</li>
+          <li>Calculate price bracket from price value</li>
+          <li>Write lead record to "Leads" sheet</li>
+          <li>Send acknowledgment email to customer (via Brevo)</li>
+          <li>Send new lead notification email to agent (via Brevo)</li>
+          <li>Return success response to frontend</li>
+        </ol>
+      </td></tr>
+      <tr><td><strong>Failure Handling</strong></td><td>If email sending fails, the lead is still saved. Email flags remain FALSE — no data is lost.</td></tr>
+      <tr><td><strong>Performance Target</strong></td><td>Complete execution in &lt; 3 seconds</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<!-- Flow 4.2: Reminder Trigger -->
+<div class="flow-card system-flow">
+  <div class="flow-header">
+    <h3>Trigger 4.2: Uncontacted Lead Reminder (Time-Driven)</h3>
+    <div class="flow-meta">
+      Type: <span class="actor-badge actor-trigger">Scheduled Trigger</span><br>
+      Fires: Every 1 hour (configurable)
+    </div>
+  </div>
+
+  <table>
+    <thead><tr><th>Property</th><th>Detail</th></tr></thead>
+    <tbody>
+      <tr><td><strong>Schedule</strong></td><td>Google Apps Script time-driven trigger, executes every 1 hour</td></tr>
+      <tr><td><strong>Function</strong></td><td><code>checkUncontactedLeads()</code></td></tr>
+      <tr><td><strong>Query Conditions</strong></td><td>
+        Find all leads in "Leads" sheet WHERE:<br>
+        <code>contacted = FALSE</code> AND<br>
+        <code>reminderSentToAgent = FALSE</code> AND<br>
+        <code>submittedAt &lt; (NOW - reminderHours)</code>
+      </td></tr>
+      <tr><td><strong>For Each Matching Lead</strong></td><td>
+        <ol style="margin: 0; padding-left: 16px;">
+          <li>Construct reminder email with lead details and urgency message</li>
+          <li>Send reminder email to agent's email via Brevo</li>
+          <li>Set <code>reminderSentToAgent = TRUE</code> for this lead</li>
+        </ol>
+      </td></tr>
+      <tr><td><strong>Idempotency</strong></td><td>Reminder is sent <strong>only once per lead</strong> — the <code>reminderSentToAgent</code> flag prevents duplicate emails</td></tr>
+      <tr><td><strong>Configuration</strong></td><td><code>reminderHours</code> is read from AgentConfig sheet (default: 1 hour)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="page-break"></div>
+
+<!-- 5. Lead State Machine -->
+<h2>5. Lead State Machine</h2>
+
+<p>Every lead progresses through a defined set of states. Transitions between states are triggered by system events or agent actions.</p>
+
+<div class="state-diagram">
+  <h4 style="margin-bottom: 20px; color: var(--primary);">Lead Lifecycle States</h4>
+  <div class="state-flow">
+    <div>
+      <div class="state-box state-new">NEW</div>
+      <span class="state-label">Form submitted</span>
+    </div>
+    <div class="state-arrow">→</div>
+    <div>
+      <div class="state-box state-notified">NOTIFIED</div>
+      <span class="state-label">Agent emailed</span>
+    </div>
+    <div class="state-arrow">→</div>
+    <div>
+      <div class="state-box state-reminded">REMINDED</div>
+      <span class="state-label">If uncontacted > X hrs</span>
+    </div>
+    <div class="state-arrow">→</div>
+    <div>
+      <div class="state-box state-contacted">CONTACTED</div>
+      <span class="state-label">Agent marks checkbox</span>
+    </div>
+  </div>
+</div>
+
+<h3>5.1 State Transition Table</h3>
+<table>
+  <thead><tr><th>Current State</th><th>Trigger Event</th><th>Condition</th><th>Next State</th><th>Actions</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>—</td>
+      <td>Customer submits form</td>
+      <td>Validation passes</td>
+      <td><strong>NEW</strong></td>
+      <td>Save to Sheets, send ack email to customer, send notification to agent</td>
+    </tr>
+    <tr>
+      <td>NEW</td>
+      <td>Notification email sent</td>
+      <td>Brevo API succeeds</td>
+      <td><strong>NOTIFIED</strong></td>
+      <td>Agent has been informed via email</td>
+    </tr>
+    <tr>
+      <td>NOTIFIED</td>
+      <td>Reminder trigger fires</td>
+      <td><code>contacted = FALSE</code> AND <code>reminderSent = FALSE</code> AND <code>age > reminderHours</code></td>
+      <td><strong>REMINDED</strong></td>
+      <td>Send reminder email to agent, set <code>reminderSent = TRUE</code></td>
+    </tr>
+    <tr>
+      <td>NEW / NOTIFIED / REMINDED</td>
+      <td>Agent checks "Contacted" checkbox</td>
+      <td>Agent is authenticated (PIN)</td>
+      <td><strong>CONTACTED</strong></td>
+      <td>Set <code>contacted = TRUE</code>, record <code>contactedAt</code> timestamp</td>
+    </tr>
+    <tr>
+      <td>CONTACTED</td>
+      <td>Agent unchecks "Contacted" checkbox</td>
+      <td>Agent is authenticated (PIN)</td>
+      <td><strong>NOTIFIED or REMINDED</strong></td>
+      <td>Set <code>contacted = FALSE</code>, clear <code>contactedAt</code>. Note: reminder flag is NOT reset.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <strong>Note:</strong> The states NEW, NOTIFIED, REMINDED are implicit — derived from the combination of boolean flags (<code>contacted</code>, <code>reminderSentToAgent</code>) and timestamps. There is no separate "state" column in the sheet; the state is computed logically.
+</div>
+
+<div class="page-break"></div>
+
+<!-- 6. Complete Event-Trigger Matrix -->
+<h2>6. Complete Event-Trigger Matrix</h2>
+
+<p>This matrix provides a comprehensive, single-reference view of <strong>every event in the system</strong>, who triggers it, what conditions apply, and what actions result.</p>
+
+<table class="trigger-row">
+  <thead>
+    <tr>
+      <th style="width: 40px;">#</th>
+      <th>Event</th>
+      <th>Triggered By</th>
+      <th>Conditions</th>
+      <th>System Actions</th>
+      <th>Emails Sent</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>E1</td>
+      <td><strong>Form page loaded</strong></td>
+      <td><span class="actor-badge actor-customer">Customer</span></td>
+      <td>None</td>
+      <td>Render form UI</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>E2</td>
+      <td><strong>Form field validated</strong></td>
+      <td><span class="actor-badge actor-customer">Customer</span></td>
+      <td>Field loses focus or value changes</td>
+      <td>Run client-side validation, show/hide error messages</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>E3</td>
+      <td><strong>Form submitted</strong></td>
+      <td><span class="actor-badge actor-customer">Customer</span></td>
+      <td>All client-side validation passes</td>
+      <td>POST to Apps Script → Server validates → Save to Sheets → Return response</td>
+      <td>1) Ack to customer<br>2) Notification to agent</td>
+    </tr>
+    <tr>
+      <td>E4</td>
+      <td><strong>Dashboard opened</strong></td>
+      <td><span class="actor-badge actor-agent">Agent</span></td>
+      <td>None</td>
+      <td>Show PIN login overlay</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>E5</td>
+      <td><strong>PIN submitted</strong></td>
+      <td><span class="actor-badge actor-agent">Agent</span></td>
+      <td>PIN matches AgentConfig</td>
+      <td>Hide login overlay → Fetch all leads → Render dashboard</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>E6</td>
+      <td><strong>Refresh clicked</strong></td>
+      <td><span class="actor-badge actor-agent">Agent</span></td>
+      <td>Agent is authenticated</td>
+      <td>Re-fetch leads data → Re-render stats, charts, table</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>E7</td>
+      <td><strong>Contacted checkbox toggled</strong></td>
+      <td><span class="actor-badge actor-agent">Agent</span></td>
+      <td>Agent is authenticated</td>
+      <td>POST update → Modify Sheet row → Update UI</td>
+      <td>None</td>
+    </tr>
+    <tr>
+      <td>E8</td>
+      <td><strong>Send Email clicked</strong></td>
+      <td><span class="actor-badge actor-agent">Agent</span></td>
+      <td>Agent is authenticated</td>
+      <td>POST request → Fetch lead data → Construct email → Send via Brevo</td>
+      <td>1) Follow-up to customer</td>
+    </tr>
+    <tr>
+      <td>E9</td>
+      <td><strong>Hourly timer fires</strong></td>
+      <td><span class="actor-badge actor-trigger">Scheduler</span></td>
+      <td>Leads exist where: <code>contacted = FALSE</code> AND <code>reminderSent = FALSE</code> AND <code>age > X hrs</code></td>
+      <td>For each qualifying lead: send reminder → set flag</td>
+      <td>1) Reminder to agent<br>(per qualifying lead)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- 7. Edge Cases & Error Scenarios -->
+<h2>7. Edge Cases &amp; Error Scenarios</h2>
+
+<table>
+  <thead><tr><th>#</th><th>Scenario</th><th>Expected Behavior</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>EC1</td>
+      <td>Customer submits form while offline / network drops mid-request</td>
+      <td>Fetch fails → Error toast shown → Form data preserved → User retries when online</td>
+    </tr>
+    <tr>
+      <td>EC2</td>
+      <td>Customer double-clicks submit button</td>
+      <td>Button is disabled on first click → Only one request sent</td>
+    </tr>
+    <tr>
+      <td>EC3</td>
+      <td>Customer submits same email multiple times</td>
+      <td>v1: Each submission creates a new lead (no dedup). Noted for v1.5 enhancement.</td>
+    </tr>
+    <tr>
+      <td>EC4</td>
+      <td>Brevo API is down during form submission</td>
+      <td>Lead is saved to Sheets (no data loss). Email flags remain FALSE. Agent can see the lead on dashboard.</td>
+    </tr>
+    <tr>
+      <td>EC5</td>
+      <td>Agent enters wrong PIN 10+ times</td>
+      <td>v1: No lockout mechanism. Each attempt simply returns "Invalid PIN." Note for v2: add rate limiting or lockout after N attempts.</td>
+    </tr>
+    <tr>
+      <td>EC6</td>
+      <td>Agent checks/unchecks "Contacted" rapidly</td>
+      <td>Each toggle sends an API call. Last state wins. No race condition — sequential processing in Apps Script.</td>
+    </tr>
+    <tr>
+      <td>EC7</td>
+      <td>Google Sheets is at capacity (10M cells)</td>
+      <td>Extremely unlikely for this use case (~10K leads = 110K cells). If it happens, Apps Script returns error.</td>
+    </tr>
+    <tr>
+      <td>EC8</td>
+      <td>Dashboard loaded with 0 leads</td>
+      <td>Stats show zeros, charts show empty state with "No data yet" message, table shows "No leads found" placeholder.</td>
+    </tr>
+    <tr>
+      <td>EC9</td>
+      <td>Brevo daily limit exceeded (300 emails/day)</td>
+      <td>Brevo returns 429 error. Lead is saved, email not sent. Agent is notified via dashboard error message.</td>
+    </tr>
+    <tr>
+      <td>EC10</td>
+      <td>Customer enters extremely long text in Area field</td>
+      <td>Client-side: max 100 chars enforced. Server-side: truncated to 100 chars before saving.</td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- 8. Summary -->
+<h2>8. Summary of All Email Types</h2>
+
+<table>
+  <thead><tr><th>#</th><th>Email Name</th><th>Recipient</th><th>Trigger</th><th>Frequency</th><th>Template Subject</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>EM1</td>
+      <td>Lead Acknowledgment</td>
+      <td>Customer</td>
+      <td>Form submission (automatic)</td>
+      <td>Once per lead</td>
+      <td>"Thank you for your interest, {name}!"</td>
+    </tr>
+    <tr>
+      <td>EM2</td>
+      <td>New Lead Notification</td>
+      <td>Agent</td>
+      <td>Form submission (automatic)</td>
+      <td>Once per lead</td>
+      <td>"🏠 New Lead: {name} — ₹{price} in {area}"</td>
+    </tr>
+    <tr>
+      <td>EM3</td>
+      <td>Uncontacted Reminder</td>
+      <td>Agent</td>
+      <td>Scheduler (hourly check)</td>
+      <td>Once per lead (flag-gated)</td>
+      <td>"⏰ Reminder: {name} hasn't been contacted"</td>
+    </tr>
+    <tr>
+      <td>EM4</td>
+      <td>Agent Follow-up</td>
+      <td>Customer</td>
+      <td>Agent clicks "Send Email"</td>
+      <td>Manual (can be multiple)</td>
+      <td>"Regarding your property inquiry — {agentName}"</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="footer-note">
+  PropCRM — User Flows &amp; System Triggers v1.0 &nbsp;|&nbsp; Confidential — Internal Use Only &nbsp;|&nbsp; July 2026
+</div>
+
+</div>
+</body>
+</html>

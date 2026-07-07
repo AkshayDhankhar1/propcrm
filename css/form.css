@@ -1,0 +1,407 @@
+/* ============================================================
+   PropCRM — Lead Form Page Styles
+   ============================================================ */
+
+/* ── Page Background ───────────────────────────────────────── */
+.form-page {
+  min-height: 100vh;
+  background: var(--cream-50);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* ── Background Decorative Blobs ───────────────────────────── */
+.form-page::before {
+  content: '';
+  position: absolute;
+  top: -20%;
+  right: -10%;
+  width: 600px;
+  height: 600px;
+  background: radial-gradient(ellipse at center,
+    rgba(76, 175, 80, 0.12) 0%,
+    rgba(76, 175, 80, 0.04) 40%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  animation: blobFloat 20s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.form-page::after {
+  content: '';
+  position: absolute;
+  bottom: -15%;
+  left: -10%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(ellipse at center,
+    rgba(46, 125, 50, 0.10) 0%,
+    rgba(46, 125, 50, 0.03) 40%,
+    transparent 70%
+  );
+  border-radius: 50%;
+  animation: blobFloat 25s ease-in-out infinite reverse;
+  pointer-events: none;
+}
+
+@keyframes blobFloat {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  25% { transform: translate(30px, -20px) scale(1.05); }
+  50% { transform: translate(-10px, 20px) scale(0.98); }
+  75% { transform: translate(20px, 10px) scale(1.03); }
+}
+
+/* Third blob for depth */
+.blob-accent {
+  position: absolute;
+  top: 50%;
+  left: 60%;
+  width: 350px;
+  height: 350px;
+  background: radial-gradient(ellipse at center,
+    rgba(165, 214, 167, 0.15) 0%,
+    transparent 60%
+  );
+  border-radius: 50%;
+  animation: blobFloat 18s ease-in-out infinite;
+  animation-delay: -5s;
+  pointer-events: none;
+}
+
+/* ── Form Container ────────────────────────────────────────── */
+.form-wrapper {
+  width: 100%;
+  max-width: 520px;
+  position: relative;
+  z-index: 1;
+  animation: fadeInUp 0.8s var(--ease-out) both;
+}
+
+/* ── Branding Header ───────────────────────────────────────── */
+.form-brand {
+  text-align: center;
+  margin-bottom: 32px;
+}
+
+.form-brand .brand-icon {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, var(--green-600), var(--green-400));
+  border-radius: var(--radius-lg);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  font-size: 1.5rem;
+  color: white;
+  box-shadow: 0 8px 24px rgba(76, 175, 80, 0.3);
+}
+
+.form-brand h1 {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--green-800);
+  letter-spacing: -0.5px;
+}
+
+.form-brand p {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  margin-top: 6px;
+}
+
+/* ── Glass Card ────────────────────────────────────────────── */
+.form-card {
+  background: var(--glass-bg);
+  backdrop-filter: blur(var(--glass-blur));
+  -webkit-backdrop-filter: blur(var(--glass-blur));
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-xl);
+  padding: 40px 36px;
+  box-shadow: var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,0.5);
+  transition: box-shadow var(--transition-normal);
+}
+
+.form-card:hover {
+  box-shadow: var(--shadow-xl), inset 0 1px 0 rgba(255,255,255,0.5);
+}
+
+/* ── Form Groups ───────────────────────────────────────────── */
+.form-group {
+  margin-bottom: 24px;
+  position: relative;
+}
+
+.form-group:last-of-type {
+  margin-bottom: 32px;
+}
+
+.form-label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
+}
+
+.form-input-wrapper {
+  position: relative;
+}
+
+.form-input {
+  width: 100%;
+  padding: 14px 16px;
+  font-family: var(--font-family);
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.7);
+  border: 1.5px solid var(--cream-300);
+  border-radius: var(--radius-md);
+  outline: none;
+  transition: all var(--transition-normal);
+}
+
+.form-input::placeholder {
+  color: var(--text-muted);
+  font-weight: 400;
+}
+
+.form-input:hover {
+  border-color: var(--green-200);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.form-input:focus {
+  border-color: var(--green-500);
+  background: rgba(255, 255, 255, 0.95);
+  box-shadow: 0 0 0 3px rgba(76, 175, 80, 0.12);
+}
+
+/* Input with prefix (₹) */
+.input-with-prefix {
+  display: flex;
+  align-items: stretch;
+}
+
+.input-prefix {
+  display: flex;
+  align-items: center;
+  padding: 0 14px;
+  background: var(--cream-200);
+  border: 1.5px solid var(--cream-300);
+  border-right: none;
+  border-radius: var(--radius-md) 0 0 var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  transition: all var(--transition-normal);
+}
+
+.input-with-prefix .form-input {
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.input-with-prefix:focus-within .input-prefix {
+  border-color: var(--green-500);
+  background: var(--green-50);
+  color: var(--green-700);
+}
+
+/* ── Validation Error ──────────────────────────────────────── */
+.form-error {
+  display: none;
+  font-size: 0.78rem;
+  color: var(--error);
+  margin-top: 6px;
+  padding-left: 2px;
+  animation: slideDown 0.3s var(--ease-out);
+}
+
+.form-error.visible {
+  display: block;
+}
+
+.form-group.has-error .form-input {
+  border-color: var(--error);
+  background: rgba(229, 57, 53, 0.04);
+}
+
+.form-group.has-error .form-input:focus {
+  box-shadow: 0 0 0 3px rgba(229, 57, 53, 0.1);
+}
+
+.form-group.has-error .input-prefix {
+  border-color: var(--error);
+}
+
+/* ── Submit Button ─────────────────────────────────────────── */
+.btn-submit {
+  width: 100%;
+  padding: 15px 24px;
+  font-family: var(--font-family);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-inverse);
+  background: linear-gradient(135deg, var(--green-600), var(--green-700));
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  transition: all var(--transition-normal);
+  box-shadow: 0 4px 16px rgba(46, 125, 50, 0.3);
+  position: relative;
+  overflow: hidden;
+}
+
+.btn-submit::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, var(--green-700), var(--green-800));
+  opacity: 0;
+  transition: opacity var(--transition-normal);
+}
+
+.btn-submit:hover::before {
+  opacity: 1;
+}
+
+.btn-submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(46, 125, 50, 0.4);
+}
+
+.btn-submit:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(46, 125, 50, 0.3);
+}
+
+.btn-submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.btn-submit:disabled:hover::before {
+  opacity: 0;
+}
+
+.btn-submit .btn-text,
+.btn-submit .spinner {
+  position: relative;
+  z-index: 1;
+}
+
+/* ── Footer Text ───────────────────────────────────────────── */
+.form-footer {
+  text-align: center;
+  margin-top: 20px;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.form-footer a {
+  color: var(--green-600);
+  font-weight: 500;
+}
+
+/* ── Success Overlay ───────────────────────────────────────── */
+.success-overlay {
+  display: none;
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(8px);
+  border-radius: var(--radius-xl);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+  animation: fadeIn 0.3s ease;
+}
+
+.success-overlay.visible {
+  display: flex;
+}
+
+.success-checkmark {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--green-500), var(--green-600));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+  animation: scaleIn 0.5s var(--ease-spring);
+  box-shadow: 0 8px 24px rgba(76, 175, 80, 0.35);
+}
+
+.success-checkmark svg {
+  width: 36px;
+  height: 36px;
+  stroke: white;
+  stroke-width: 3;
+  fill: none;
+  stroke-dasharray: 50;
+  stroke-dashoffset: 50;
+  animation: checkDraw 0.5s ease 0.3s forwards;
+}
+
+@keyframes checkDraw {
+  to { stroke-dashoffset: 0; }
+}
+
+.success-overlay h2 {
+  font-size: 1.3rem;
+  color: var(--green-800);
+  margin-bottom: 8px;
+}
+
+.success-overlay p {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  text-align: center;
+  max-width: 300px;
+}
+
+/* ── Responsive ────────────────────────────────────────────── */
+@media (max-width: 560px) {
+  .form-page {
+    padding: 24px 16px;
+    align-items: flex-start;
+    padding-top: 60px;
+  }
+
+  .form-card {
+    padding: 28px 22px;
+  }
+
+  .form-brand h1 {
+    font-size: 1.5rem;
+  }
+
+  .form-page::before {
+    width: 350px;
+    height: 350px;
+    top: -10%;
+    right: -20%;
+  }
+
+  .form-page::after {
+    width: 300px;
+    height: 300px;
+    bottom: -10%;
+    left: -20%;
+  }
+}

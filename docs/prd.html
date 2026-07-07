@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRD — PropCRM Lead Management System</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --primary: #1B5E20;
+    --primary-light: #4CAF50;
+    --accent: #E8F5E9;
+    --bg: #FFFFFF;
+    --text: #1a1a1a;
+    --text-muted: #555;
+    --border: #E0E0E0;
+    --header-bg: #1B5E20;
+    --header-text: #FFFFFF;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 11pt;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+  }
+
+  @page {
+    size: A4;
+    margin: 20mm 18mm 25mm 18mm;
+    @bottom-center { content: counter(page); font-size: 9pt; color: #999; }
+  }
+
+  @media print {
+    body { font-size: 10pt; }
+    .page-break { page-break-before: always; }
+    .no-break { page-break-inside: avoid; }
+    .cover { page-break-after: always; }
+  }
+
+  /* Cover Page */
+  .cover {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 90vh;
+    text-align: center;
+    padding: 60px 40px;
+  }
+
+  .cover .logo-bar {
+    width: 80px;
+    height: 6px;
+    background: var(--primary);
+    border-radius: 3px;
+    margin-bottom: 40px;
+  }
+
+  .cover h1 {
+    font-size: 32pt;
+    font-weight: 700;
+    color: var(--primary);
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+
+  .cover .subtitle {
+    font-size: 14pt;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-bottom: 50px;
+  }
+
+  .cover .doc-type {
+    font-size: 13pt;
+    font-weight: 600;
+    color: var(--primary);
+    text-transform: uppercase;
+    letter-spacing: 3px;
+    margin-bottom: 60px;
+  }
+
+  .cover .meta-table {
+    width: 360px;
+    border-collapse: collapse;
+    text-align: left;
+  }
+
+  .cover .meta-table td {
+    padding: 8px 16px;
+    font-size: 10pt;
+    border-bottom: 1px solid #eee;
+  }
+
+  .cover .meta-table td:first-child {
+    font-weight: 600;
+    color: var(--text-muted);
+    width: 140px;
+  }
+
+  .cover .confidential {
+    margin-top: 60px;
+    font-size: 8.5pt;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+  }
+
+  /* Main Content */
+  .content { max-width: 780px; margin: 0 auto; padding: 40px 20px; }
+
+  h2 {
+    font-size: 18pt;
+    font-weight: 700;
+    color: var(--primary);
+    margin-top: 40px;
+    margin-bottom: 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid var(--primary);
+  }
+
+  h3 {
+    font-size: 13pt;
+    font-weight: 600;
+    color: #333;
+    margin-top: 28px;
+    margin-bottom: 10px;
+  }
+
+  h4 {
+    font-size: 11pt;
+    font-weight: 600;
+    color: var(--primary);
+    margin-top: 20px;
+    margin-bottom: 8px;
+  }
+
+  p { margin-bottom: 12px; }
+
+  ul, ol { margin: 8px 0 16px 24px; }
+  li { margin-bottom: 6px; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 16px 0 24px 0;
+    font-size: 10pt;
+  }
+
+  th {
+    background: var(--header-bg);
+    color: var(--header-text);
+    font-weight: 600;
+    text-align: left;
+    padding: 10px 14px;
+    font-size: 9.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+
+  tr:nth-child(even) { background: #FAFAFA; }
+  tr:hover { background: var(--accent); }
+
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 8.5pt;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+  }
+
+  .badge-must { background: #FFEBEE; color: #C62828; }
+  .badge-should { background: #FFF3E0; color: #E65100; }
+  .badge-could { background: #E8F5E9; color: #2E7D32; }
+  .badge-high { background: #FFEBEE; color: #C62828; }
+  .badge-medium { background: #FFF3E0; color: #E65100; }
+  .badge-low { background: #E8F5E9; color: #2E7D32; }
+
+  .callout {
+    padding: 16px 20px;
+    border-left: 4px solid var(--primary);
+    background: var(--accent);
+    border-radius: 0 6px 6px 0;
+    margin: 16px 0;
+    font-size: 10pt;
+  }
+
+  .callout-warning {
+    border-left-color: #F57C00;
+    background: #FFF3E0;
+  }
+
+  .toc { padding: 20px 0; }
+  .toc a {
+    color: var(--text);
+    text-decoration: none;
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px dotted #ddd;
+    font-size: 10.5pt;
+  }
+  .toc a:hover { color: var(--primary); }
+  .toc .toc-section { font-weight: 600; margin-top: 8px; }
+
+  .revision-table td, .revision-table th { font-size: 9.5pt; }
+
+  .footer-note {
+    margin-top: 60px;
+    padding-top: 16px;
+    border-top: 1px solid #ddd;
+    font-size: 8.5pt;
+    color: #999;
+    text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== COVER PAGE ==================== -->
+<div class="cover">
+  <div class="logo-bar"></div>
+  <h1>PropCRM</h1>
+  <p class="subtitle">Lead Management System for Real Estate Agents</p>
+  <p class="doc-type">Product Requirements Document</p>
+  <table class="meta-table">
+    <tr><td>Document Version</td><td>1.0</td></tr>
+    <tr><td>Date</td><td>July 7, 2026</td></tr>
+    <tr><td>Status</td><td>Draft — Pending Approval</td></tr>
+    <tr><td>Author</td><td>Product Engineering Team</td></tr>
+    <tr><td>Stakeholders</td><td>Engineering, Sales, Management</td></tr>
+  </table>
+  <p class="confidential">Confidential — Internal Use Only</p>
+</div>
+
+<!-- ==================== CONTENT ==================== -->
+<div class="content">
+
+<!-- Revision History -->
+<h2>Revision History</h2>
+<table class="revision-table">
+  <thead>
+    <tr><th>Version</th><th>Date</th><th>Author</th><th>Description</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>0.1</td><td>Jul 5, 2026</td><td>Engineering</td><td>Initial draft — requirements gathering</td></tr>
+    <tr><td>0.9</td><td>Jul 6, 2026</td><td>Engineering</td><td>Finalized functional requirements, added NFRs</td></tr>
+    <tr><td>1.0</td><td>Jul 7, 2026</td><td>Engineering</td><td>Complete PRD — submitted for approval</td></tr>
+  </tbody>
+</table>
+
+<!-- Table of Contents -->
+<h2>Table of Contents</h2>
+<div class="toc">
+  <a class="toc-section"><span>1. Executive Summary</span></a>
+  <a><span>2. Problem Statement</span></a>
+  <a><span>3. Goals &amp; Objectives</span></a>
+  <a><span>4. Target Users &amp; Personas</span></a>
+  <a><span>5. Scope Definition</span></a>
+  <a><span>6. Functional Requirements</span></a>
+  <a><span>7. Non-Functional Requirements</span></a>
+  <a><span>8. Technical Architecture</span></a>
+  <a><span>9. Dependencies &amp; Integrations</span></a>
+  <a><span>10. Success Metrics &amp; KPIs</span></a>
+  <a><span>11. Risk Assessment</span></a>
+  <a><span>12. Timeline &amp; Milestones</span></a>
+  <a><span>13. Appendix</span></a>
+</div>
+
+<div class="page-break"></div>
+
+<!-- 1. Executive Summary -->
+<h2>1. Executive Summary</h2>
+<p><strong>PropCRM</strong> is a lightweight, web-based Customer Relationship Management system designed specifically for independent real estate agents operating in the Indian market. The system captures property inquiry leads through a public-facing form, stores them in Google Sheets, and provides a secure agent dashboard for lead management, communication, and analytics.</p>
+<p>The product eliminates the need for expensive CRM subscriptions by leveraging free-tier services — Google Sheets for data storage, Google Apps Script for backend logic, GitHub Pages for hosting, and Brevo for transactional email delivery.</p>
+<div class="callout">
+  <strong>Key Value Proposition:</strong> A zero-cost, fully functional CRM that an individual real estate agent can deploy in under 30 minutes, with automated lead notifications, email follow-ups, and visual analytics — without any recurring subscription fees.
+</div>
+
+<!-- 2. Problem Statement -->
+<h2>2. Problem Statement</h2>
+<p>Independent real estate agents in India face several challenges in managing their leads:</p>
+<ul>
+  <li><strong>Manual lead tracking:</strong> Leads arrive via phone calls, WhatsApp messages, website forms, and social media — scattered across platforms with no unified view.</li>
+  <li><strong>No follow-up system:</strong> Without automated reminders, agents frequently miss or delay following up on leads, resulting in lost conversions.</li>
+  <li><strong>No data visibility:</strong> Agents lack insight into which price brackets or localities generate the most interest, preventing them from optimizing their marketing spend and listings.</li>
+  <li><strong>High CRM costs:</strong> Enterprise CRM tools (Salesforce, HubSpot, Zoho) are priced for teams and are overkill for a single agent handling 50–500 leads per month.</li>
+</ul>
+
+<!-- 3. Goals & Objectives -->
+<h2>3. Goals &amp; Objectives</h2>
+<h3>3.1 Primary Goals</h3>
+<table>
+  <thead><tr><th>ID</th><th>Goal</th><th>Measurable Target</th></tr></thead>
+  <tbody>
+    <tr><td>G1</td><td>Centralize all property inquiry leads in one system</td><td>100% of web leads captured in Sheets within 2 seconds</td></tr>
+    <tr><td>G2</td><td>Automate lead notification to the agent</td><td>Agent receives email within 30 seconds of form submission</td></tr>
+    <tr><td>G3</td><td>Reduce lead response time</td><td>Reminder sent if lead is uncontacted for &gt; 1 hour</td></tr>
+    <tr><td>G4</td><td>Provide actionable analytics</td><td>Real-time price bracket &amp; locality distribution charts</td></tr>
+    <tr><td>G5</td><td>Zero operational cost</td><td>$0/month recurring cost using free-tier services</td></tr>
+  </tbody>
+</table>
+
+<h3>3.2 Secondary Goals</h3>
+<ul>
+  <li>Provide a professional, branded lead capture form that builds credibility with prospects.</li>
+  <li>Enable the agent to send professional follow-up emails directly from the dashboard.</li>
+  <li>Create a scalable architecture that can later support multiple agents if the business grows.</li>
+</ul>
+
+<!-- 4. Target Users & Personas -->
+<h2>4. Target Users &amp; Personas</h2>
+
+<h3>Persona 1: Property Seeker (Customer)</h3>
+<table>
+  <tr><td style="width:160px;"><strong>Role</strong></td><td>End consumer looking to buy/rent property</td></tr>
+  <tr><td><strong>Demographics</strong></td><td>Age 25–55, urban Indian, smartphone-first, may use desktop</td></tr>
+  <tr><td><strong>Goal</strong></td><td>Submit a property inquiry quickly and receive a response from the agent</td></tr>
+  <tr><td><strong>Pain Points</strong></td><td>Lengthy forms, no confirmation of submission, slow agent response</td></tr>
+  <tr><td><strong>Expectations</strong></td><td>Simple form, instant confirmation, agent follow-up within hours</td></tr>
+</table>
+
+<h3>Persona 2: Real Estate Agent</h3>
+<table>
+  <tr><td style="width:160px;"><strong>Role</strong></td><td>Independent real estate agent managing property sales/rentals</td></tr>
+  <tr><td><strong>Demographics</strong></td><td>Age 28–50, moderate tech literacy, manages 50–500 leads/month</td></tr>
+  <tr><td><strong>Goal</strong></td><td>Track all leads, prioritize follow-ups, understand market demand</td></tr>
+  <tr><td><strong>Pain Points</strong></td><td>Leads slip through cracks, no analytics, expensive CRM tools</td></tr>
+  <tr><td><strong>Expectations</strong></td><td>Single dashboard to view, manage, and contact all leads with visual insights</td></tr>
+</table>
+
+<div class="page-break"></div>
+
+<!-- 5. Scope Definition -->
+<h2>5. Scope Definition</h2>
+
+<h3>5.1 In Scope (v1.0)</h3>
+<table>
+  <thead><tr><th>Category</th><th>Feature</th></tr></thead>
+  <tbody>
+    <tr><td>Lead Capture</td><td>Public web form with fields: Name, Email, Property Area (locality), Property Price</td></tr>
+    <tr><td>Data Storage</td><td>All leads stored in Google Sheets with auto-generated ID, timestamp, and price bracket</td></tr>
+    <tr><td>Agent Dashboard</td><td>PIN-protected dashboard with leads table, stats cards, and analytics charts</td></tr>
+    <tr><td>Lead Management</td><td>Mark leads as contacted (checkbox), send follow-up email to lead</td></tr>
+    <tr><td>Email — Acknowledgment</td><td>Automatic email to customer upon form submission</td></tr>
+    <tr><td>Email — Agent Notification</td><td>Immediate email to agent when a new lead is submitted</td></tr>
+    <tr><td>Email — Reminder</td><td>Automated reminder email to agent for uncontacted leads (configurable hours)</td></tr>
+    <tr><td>Analytics</td><td>Price bracket distribution (doughnut chart), area/locality distribution (bar chart)</td></tr>
+    <tr><td>Configuration</td><td>Agent name, email, Brevo API key, PIN, and reminder hours stored in Google Sheets</td></tr>
+  </tbody>
+</table>
+
+<h3>5.2 Out of Scope (Future Versions)</h3>
+<table>
+  <thead><tr><th>Feature</th><th>Reason for Exclusion</th><th>Target Version</th></tr></thead>
+  <tbody>
+    <tr><td>Multi-agent support</td><td>v1 is designed for a single agent</td><td>v2.0</td></tr>
+    <tr><td>WhatsApp integration</td><td>Requires WhatsApp Business API setup</td><td>v1.5</td></tr>
+    <tr><td>Lead stages/pipeline</td><td>Adds complexity; v1 focuses on contact tracking</td><td>v2.0</td></tr>
+    <tr><td>Lead source tracking (UTM)</td><td>Enhancement after core is validated</td><td>v1.5</td></tr>
+    <tr><td>User authentication (OAuth)</td><td>Overkill for single agent; PIN is sufficient</td><td>v2.0</td></tr>
+    <tr><td>Mobile native app</td><td>Responsive web is sufficient for v1</td><td>v3.0</td></tr>
+    <tr><td>CSV/Excel export</td><td>Agent can access Google Sheets directly</td><td>v1.5</td></tr>
+    <tr><td>Duplicate lead detection</td><td>Enhancement after core flow is stable</td><td>v1.5</td></tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- 6. Functional Requirements -->
+<h2>6. Functional Requirements</h2>
+
+<h3>FR-1: Lead Capture Form</h3>
+<table>
+  <thead><tr><th>Req ID</th><th>Requirement</th><th>Priority</th><th>Acceptance Criteria</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>FR-1.1</td>
+      <td>Form shall contain fields: Full Name, Email Address, Property Area (locality), Property Price (₹)</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>All four fields render correctly on desktop and mobile</td>
+    </tr>
+    <tr>
+      <td>FR-1.2</td>
+      <td>All fields are mandatory. Form shall not submit with any empty field.</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>Submit button is disabled or shows error for incomplete forms</td>
+    </tr>
+    <tr>
+      <td>FR-1.3</td>
+      <td>Name must be at least 2 characters, alphabetic with spaces allowed</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>Inline error message shown for invalid name</td>
+    </tr>
+    <tr>
+      <td>FR-1.4</td>
+      <td>Email must be a valid email format (RFC 5322 compliant regex)</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>Inline error message shown for invalid email</td>
+    </tr>
+    <tr>
+      <td>FR-1.5</td>
+      <td>Price must be a positive number greater than zero</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>Non-numeric or negative values rejected with error</td>
+    </tr>
+    <tr>
+      <td>FR-1.6</td>
+      <td>Form shall display a loading spinner during submission</td>
+      <td><span class="badge badge-should">Should Have</span></td>
+      <td>Submit button shows spinner, prevents double-click</td>
+    </tr>
+    <tr>
+      <td>FR-1.7</td>
+      <td>On successful submission, form shall display a success toast and reset</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>Success message visible for 5 seconds, form fields cleared</td>
+    </tr>
+    <tr>
+      <td>FR-1.8</td>
+      <td>On failed submission, form shall display an error toast with retry option</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>Error message visible, form data preserved for retry</td>
+    </tr>
+    <tr>
+      <td>FR-1.9</td>
+      <td>Form design shall use glassmorphism effect with cream and green color palette</td>
+      <td><span class="badge badge-should">Should Have</span></td>
+      <td>Visual review approved by stakeholder</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>FR-2: Data Storage (Google Sheets)</h3>
+<table>
+  <thead><tr><th>Req ID</th><th>Requirement</th><th>Priority</th><th>Acceptance Criteria</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>FR-2.1</td>
+      <td>Each lead shall be stored as a row in the "Leads" sheet with columns: ID, Name, Email, Area, Price, Price Bracket, Submitted At, Contacted, Contacted At, Email Sent To Lead, Reminder Sent To Agent</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>New row appears in Sheets within 3 seconds of form submission</td>
+    </tr>
+    <tr>
+      <td>FR-2.2</td>
+      <td>Lead ID shall be a unique auto-generated identifier (UUID v4 or timestamp-based)</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>No duplicate IDs across all leads</td>
+    </tr>
+    <tr>
+      <td>FR-2.3</td>
+      <td>Price bracket shall be auto-calculated: Under 25L, 25L–50L, 50L–1Cr, 1Cr–2Cr, 2Cr–5Cr, 5Cr+</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>Correct bracket assigned for boundary values (e.g., ₹25,00,000 → "25L–50L")</td>
+    </tr>
+    <tr>
+      <td>FR-2.4</td>
+      <td>Agent configuration shall be stored in a separate "AgentConfig" sheet</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>Agent name, email, Brevo key, PIN, and reminder hours readable by the system</td>
+    </tr>
+    <tr>
+      <td>FR-2.5</td>
+      <td>Server-side validation shall reject malformed data before writing to Sheets</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>Invalid submissions return HTTP 400 with error description</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>FR-3: Agent Dashboard</h3>
+<table>
+  <thead><tr><th>Req ID</th><th>Requirement</th><th>Priority</th><th>Acceptance Criteria</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>FR-3.1</td>
+      <td>Dashboard shall be protected by a PIN/password login screen</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>Dashboard content hidden until correct PIN entered</td>
+    </tr>
+    <tr>
+      <td>FR-3.2</td>
+      <td>Dashboard shall display summary stats: Total Leads, Contacted %, Uncontacted Count, Average Property Price</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>Stats update on page load and on manual refresh</td>
+    </tr>
+    <tr>
+      <td>FR-3.3</td>
+      <td>Price distribution shall be visualized as a doughnut/bar chart with percentage labels</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>Chart segments match the 6 defined price brackets with green gradient coloring</td>
+    </tr>
+    <tr>
+      <td>FR-3.4</td>
+      <td>Area/locality distribution shall be visualized as a horizontal bar chart</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>Top N localities displayed with lead count</td>
+    </tr>
+    <tr>
+      <td>FR-3.5</td>
+      <td>Chart colors shall follow green gradient: higher concentration → darker green</td>
+      <td><span class="badge badge-should">Should Have</span></td>
+      <td>Visual review confirms gradient is clear and readable</td>
+    </tr>
+    <tr>
+      <td>FR-3.6</td>
+      <td>Leads table shall display all lead data with columns: Name, Email, Area, Price, Date, Contacted, Actions</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>Table is scrollable, sortable by date, and matches Sheets data</td>
+    </tr>
+    <tr>
+      <td>FR-3.7</td>
+      <td>Each row shall have a "Contacted" checkbox that updates the lead status in real-time</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>Checkbox toggle updates Google Sheet within 3 seconds</td>
+    </tr>
+    <tr>
+      <td>FR-3.8</td>
+      <td>Each row shall have a "Send Email" button to send a follow-up email to the lead</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>Email sent via Brevo, confirmation shown to agent</td>
+    </tr>
+    <tr>
+      <td>FR-3.9</td>
+      <td>Dashboard shall have a manual "Refresh" button to re-fetch latest data</td>
+      <td><span class="badge badge-should">Should Have</span></td>
+      <td>Data refreshes without full page reload</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>FR-4: Email System (via Brevo API)</h3>
+<table>
+  <thead><tr><th>Req ID</th><th>Requirement</th><th>Priority</th><th>Trigger</th><th>Acceptance Criteria</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>FR-4.1</td>
+      <td>Send acknowledgment email to lead upon form submission</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>Form submit → Apps Script</td>
+      <td>Lead receives email within 60 seconds of submission</td>
+    </tr>
+    <tr>
+      <td>FR-4.2</td>
+      <td>Send new lead notification email to agent upon form submission</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>Form submit → Apps Script</td>
+      <td>Agent receives email with lead details within 60 seconds</td>
+    </tr>
+    <tr>
+      <td>FR-4.3</td>
+      <td>Send reminder email to agent for leads uncontacted beyond configured hours</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>Scheduled trigger (every 1 hour)</td>
+      <td>Reminder sent only once per lead; "reminderSent" flag set to TRUE</td>
+    </tr>
+    <tr>
+      <td>FR-4.4</td>
+      <td>Agent can send a follow-up email to any lead from the dashboard</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>Agent clicks "Send Email" button</td>
+      <td>Fixed template email sent, button shows success state</td>
+    </tr>
+    <tr>
+      <td>FR-4.5</td>
+      <td>All emails shall be sent via Brevo SMTP API (server-side only)</td>
+      <td><span class="badge badge-must">Must Have</span></td>
+      <td>All email actions</td>
+      <td>API key never exposed in frontend code</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- 7. Non-Functional Requirements -->
+<h2>7. Non-Functional Requirements</h2>
+
+<h3>7.1 Performance</h3>
+<table>
+  <thead><tr><th>Req ID</th><th>Requirement</th><th>Target</th></tr></thead>
+  <tbody>
+    <tr><td>NFR-1.1</td><td>Form page load time (First Contentful Paint)</td><td>&lt; 2 seconds on 4G</td></tr>
+    <tr><td>NFR-1.2</td><td>Form submission response time</td><td>&lt; 3 seconds end-to-end</td></tr>
+    <tr><td>NFR-1.3</td><td>Dashboard data load time</td><td>&lt; 5 seconds for up to 1,000 leads</td></tr>
+    <tr><td>NFR-1.4</td><td>Chart rendering time</td><td>&lt; 1 second after data is loaded</td></tr>
+  </tbody>
+</table>
+
+<h3>7.2 Security</h3>
+<table>
+  <thead><tr><th>Req ID</th><th>Requirement</th><th>Implementation</th></tr></thead>
+  <tbody>
+    <tr><td>NFR-2.1</td><td>Brevo API key must never be exposed in frontend code</td><td>Key stored in Google Sheets; accessed only by Apps Script server-side</td></tr>
+    <tr><td>NFR-2.2</td><td>Dashboard access must be gated</td><td>PIN-based authentication verified server-side</td></tr>
+    <tr><td>NFR-2.3</td><td>All API communication over HTTPS</td><td>GitHub Pages and Apps Script enforce HTTPS by default</td></tr>
+    <tr><td>NFR-2.4</td><td>Input sanitization on all user-submitted data</td><td>Server-side sanitization in Apps Script before writing to Sheets</td></tr>
+  </tbody>
+</table>
+
+<h3>7.3 Scalability</h3>
+<table>
+  <thead><tr><th>Req ID</th><th>Requirement</th><th>Limit</th></tr></thead>
+  <tbody>
+    <tr><td>NFR-3.1</td><td>System shall support up to 10,000 leads in Google Sheets</td><td>Google Sheets supports 10M cells</td></tr>
+    <tr><td>NFR-3.2</td><td>System shall handle up to 30 concurrent form submissions</td><td>Apps Script quota: 30 simultaneous executions</td></tr>
+  </tbody>
+</table>
+
+<h3>7.4 Availability &amp; Reliability</h3>
+<table>
+  <thead><tr><th>Req ID</th><th>Requirement</th><th>Note</th></tr></thead>
+  <tbody>
+    <tr><td>NFR-4.1</td><td>Frontend availability: 99.9% (GitHub Pages SLA)</td><td>No self-managed infrastructure</td></tr>
+    <tr><td>NFR-4.2</td><td>Backend availability: Dependent on Google Apps Script uptime</td><td>Google provides 99.9% SLA for Workspace</td></tr>
+    <tr><td>NFR-4.3</td><td>Email delivery: Dependent on Brevo SLA</td><td>Brevo free tier: 300 emails/day</td></tr>
+  </tbody>
+</table>
+
+<h3>7.5 Compatibility</h3>
+<table>
+  <thead><tr><th>Req ID</th><th>Requirement</th></tr></thead>
+  <tbody>
+    <tr><td>NFR-5.1</td><td>Form page: Compatible with Chrome, Firefox, Safari, Edge (latest 2 versions)</td></tr>
+    <tr><td>NFR-5.2</td><td>Form page: Responsive design — mobile (360px+), tablet (768px+), desktop (1024px+)</td></tr>
+    <tr><td>NFR-5.3</td><td>Dashboard: Optimized for desktop and tablet (768px+)</td></tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- 8. Technical Architecture -->
+<h2>8. Technical Architecture</h2>
+
+<h3>8.1 High-Level Architecture</h3>
+<table>
+  <thead><tr><th>Layer</th><th>Technology</th><th>Hosting</th><th>Cost</th></tr></thead>
+  <tbody>
+    <tr><td>Frontend (Static)</td><td>HTML5, CSS3, Vanilla JavaScript, Chart.js</td><td>GitHub Pages</td><td>Free</td></tr>
+    <tr><td>Backend (API)</td><td>Google Apps Script (Web App)</td><td>Google Cloud (managed)</td><td>Free</td></tr>
+    <tr><td>Database</td><td>Google Sheets</td><td>Google Drive</td><td>Free</td></tr>
+    <tr><td>Email Service</td><td>Brevo v3 REST API</td><td>Brevo Cloud</td><td>Free (300/day)</td></tr>
+  </tbody>
+</table>
+
+<h3>8.2 API Contract</h3>
+
+<h4>POST Endpoint: doPost(e)</h4>
+<p>All requests are sent as POST with a JSON body. The <code>action</code> field determines routing.</p>
+<table>
+  <thead><tr><th>Action</th><th>Payload</th><th>Response</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>submitLead</code></td>
+      <td><code>{ name, email, area, price }</code></td>
+      <td><code>{ success: true, id: "..." }</code> or <code>{ success: false, errors: [...] }</code></td>
+    </tr>
+    <tr>
+      <td><code>updateContacted</code></td>
+      <td><code>{ id, contacted: true/false, pin }</code></td>
+      <td><code>{ success: true }</code></td>
+    </tr>
+    <tr>
+      <td><code>sendEmailToLead</code></td>
+      <td><code>{ id, pin }</code></td>
+      <td><code>{ success: true }</code></td>
+    </tr>
+    <tr>
+      <td><code>verifyPin</code></td>
+      <td><code>{ pin }</code></td>
+      <td><code>{ success: true, agentName: "..." }</code></td>
+    </tr>
+  </tbody>
+</table>
+
+<h4>GET Endpoint: doGet(e)</h4>
+<table>
+  <thead><tr><th>Parameter</th><th>Response</th></tr></thead>
+  <tbody>
+    <tr>
+      <td><code>?action=getLeads&pin=XXXX</code></td>
+      <td>JSON array of all leads + computed stats (totals, percentages, chart data)</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- 9. Dependencies & Integrations -->
+<h2>9. Dependencies &amp; Integrations</h2>
+<table>
+  <thead><tr><th>Dependency</th><th>Type</th><th>Purpose</th><th>Fallback</th></tr></thead>
+  <tbody>
+    <tr><td>Google Sheets API</td><td>Core</td><td>Data storage and retrieval</td><td>None — core dependency</td></tr>
+    <tr><td>Google Apps Script</td><td>Core</td><td>Backend logic, API endpoints</td><td>None — core dependency</td></tr>
+    <tr><td>GitHub Pages</td><td>Core</td><td>Static frontend hosting</td><td>Netlify / Vercel (free tier)</td></tr>
+    <tr><td>Brevo API v3</td><td>External</td><td>Transactional email delivery</td><td>Apps Script MailApp (limited)</td></tr>
+    <tr><td>Chart.js v4.x</td><td>Library (CDN)</td><td>Data visualization</td><td>Manual HTML/CSS charts</td></tr>
+    <tr><td>Google Fonts (Inter)</td><td>Library (CDN)</td><td>Typography</td><td>System font stack</td></tr>
+  </tbody>
+</table>
+
+<!-- 10. Success Metrics -->
+<h2>10. Success Metrics &amp; KPIs</h2>
+<table>
+  <thead><tr><th>Metric</th><th>Target</th><th>Measurement Method</th></tr></thead>
+  <tbody>
+    <tr><td>Lead capture rate</td><td>100% of form submissions stored in Sheets</td><td>Compare form submissions vs. Sheets row count</td></tr>
+    <tr><td>Agent notification speed</td><td>&lt; 60 seconds from form submit to agent email</td><td>Timestamp comparison</td></tr>
+    <tr><td>Lead response time</td><td>&lt; 2 hours average (aided by reminders)</td><td>submittedAt vs. contactedAt delta</td></tr>
+    <tr><td>Email delivery rate</td><td>&gt; 95% delivery (Brevo SLA)</td><td>Brevo dashboard analytics</td></tr>
+    <tr><td>Dashboard uptime</td><td>99.9%</td><td>GitHub Pages status</td></tr>
+    <tr><td>Agent satisfaction</td><td>Qualitative — positive feedback</td><td>Agent interview after 2 weeks</td></tr>
+  </tbody>
+</table>
+
+<!-- 11. Risk Assessment -->
+<h2>11. Risk Assessment</h2>
+<table>
+  <thead><tr><th>Risk</th><th>Probability</th><th>Impact</th><th>Mitigation</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Google Apps Script rate limits exceeded</td>
+      <td><span class="badge badge-low">Low</span></td>
+      <td><span class="badge badge-high">High</span></td>
+      <td>Quota is 20,000 URL fetch calls/day — sufficient for &lt; 500 leads/day. Monitor usage.</td>
+    </tr>
+    <tr>
+      <td>Brevo free tier email limit hit (300/day)</td>
+      <td><span class="badge badge-medium">Medium</span></td>
+      <td><span class="badge badge-medium">Medium</span></td>
+      <td>Each lead triggers max 3 emails (ack + notify + reminder). Supports ~100 leads/day. Upgrade Brevo plan if exceeded.</td>
+    </tr>
+    <tr>
+      <td>Google Sheets performance degrades at scale</td>
+      <td><span class="badge badge-low">Low</span></td>
+      <td><span class="badge badge-medium">Medium</span></td>
+      <td>Archive old leads periodically. Sheets supports 10M cells. Consider migration to Firebase at 5,000+ leads.</td>
+    </tr>
+    <tr>
+      <td>PIN-based auth is weak security</td>
+      <td><span class="badge badge-medium">Medium</span></td>
+      <td><span class="badge badge-low">Low</span></td>
+      <td>Acceptable for v1 single-agent use. Dashboard URL is not indexed by search engines. Upgrade to OAuth in v2.</td>
+    </tr>
+    <tr>
+      <td>CORS issues between GitHub Pages and Apps Script</td>
+      <td><span class="badge badge-low">Low</span></td>
+      <td><span class="badge badge-high">High</span></td>
+      <td>Apps Script Web Apps handle CORS natively when deployed as "Anyone can access." Tested during development.</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- 12. Timeline & Milestones -->
+<h2>12. Timeline &amp; Milestones</h2>
+<table>
+  <thead><tr><th>Phase</th><th>Duration</th><th>Deliverables</th><th>Status</th></tr></thead>
+  <tbody>
+    <tr><td>Phase 1: Documentation</td><td>Day 1</td><td>PRD, Data Flow, User Flows</td><td>✅ Complete</td></tr>
+    <tr><td>Phase 2: Google Sheets Setup</td><td>Day 1</td><td>Sheets structure, AgentConfig populated</td><td>⬜ Pending</td></tr>
+    <tr><td>Phase 3: Backend (Apps Script)</td><td>Day 1–2</td><td>All API endpoints, email functions, validation</td><td>⬜ Pending</td></tr>
+    <tr><td>Phase 4: Lead Form (Frontend)</td><td>Day 2</td><td>Form page with validation, glassmorphism design</td><td>⬜ Pending</td></tr>
+    <tr><td>Phase 5: Agent Dashboard (Frontend)</td><td>Day 2–3</td><td>Dashboard with table, charts, email actions</td><td>⬜ Pending</td></tr>
+    <tr><td>Phase 6: Integration Testing</td><td>Day 3</td><td>End-to-end testing of all flows</td><td>⬜ Pending</td></tr>
+    <tr><td>Phase 7: Deployment</td><td>Day 3</td><td>GitHub Pages live, Apps Script deployed, triggers set</td><td>⬜ Pending</td></tr>
+  </tbody>
+</table>
+
+<!-- 13. Appendix -->
+<h2>13. Appendix</h2>
+
+<h3>A. Price Bracket Mapping</h3>
+<table>
+  <thead><tr><th>Price Range (₹)</th><th>Bracket Label</th></tr></thead>
+  <tbody>
+    <tr><td>0 – 24,99,999</td><td>Under 25L</td></tr>
+    <tr><td>25,00,000 – 49,99,999</td><td>25L – 50L</td></tr>
+    <tr><td>50,00,000 – 99,99,999</td><td>50L – 1Cr</td></tr>
+    <tr><td>1,00,00,000 – 1,99,99,999</td><td>1Cr – 2Cr</td></tr>
+    <tr><td>2,00,00,000 – 4,99,99,999</td><td>2Cr – 5Cr</td></tr>
+    <tr><td>5,00,00,000+</td><td>5Cr+</td></tr>
+  </tbody>
+</table>
+
+<h3>B. Email Template Content</h3>
+<table>
+  <thead><tr><th>Template</th><th>Subject Line</th><th>Recipient</th></tr></thead>
+  <tbody>
+    <tr><td>Lead Acknowledgment</td><td>"Thank you for your interest, {name}!"</td><td>Customer (lead)</td></tr>
+    <tr><td>New Lead Notification</td><td>"🏠 New Lead: {name} — ₹{price} in {area}"</td><td>Agent</td></tr>
+    <tr><td>Uncontacted Reminder</td><td>"⏰ Reminder: {name} hasn't been contacted yet"</td><td>Agent</td></tr>
+    <tr><td>Agent Follow-up</td><td>"Regarding your property inquiry — {agentName}"</td><td>Customer (lead)</td></tr>
+  </tbody>
+</table>
+
+<h3>C. Glossary</h3>
+<table>
+  <thead><tr><th>Term</th><th>Definition</th></tr></thead>
+  <tbody>
+    <tr><td>Lead</td><td>A potential customer who has submitted the property inquiry form</td></tr>
+    <tr><td>Contacted</td><td>A lead that the agent has followed up with (marked via checkbox)</td></tr>
+    <tr><td>Price Bracket</td><td>A predefined range category for property prices in the Indian market</td></tr>
+    <tr><td>Brevo</td><td>Third-party transactional email service (formerly Sendinblue)</td></tr>
+    <tr><td>Apps Script</td><td>Google's JavaScript-based platform for extending Google Workspace</td></tr>
+    <tr><td>PIN</td><td>Personal Identification Number used for dashboard authentication</td></tr>
+  </tbody>
+</table>
+
+<div class="footer-note">
+  PropCRM — Product Requirements Document v1.0 &nbsp;|&nbsp; Confidential — Internal Use Only &nbsp;|&nbsp; July 2026
+</div>
+
+</div>
+</body>
+</html>

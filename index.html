@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Submit your property inquiry and get connected with our real estate expert. Fast response guaranteed.">
+  <title>PropCRM — Property Inquiry</title>
+  <link rel="stylesheet" href="css/common.css">
+  <link rel="stylesheet" href="css/form.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+</head>
+<body>
+  <main class="form-page" id="form-page">
+    <!-- Decorative blob -->
+    <div class="blob-accent" aria-hidden="true"></div>
+
+    <div class="form-wrapper">
+      <!-- Branding -->
+      <header class="form-brand">
+        <div class="brand-icon" aria-hidden="true">🏠</div>
+        <h1>PropCRM</h1>
+        <p>Find your dream property — submit your inquiry below</p>
+      </header>
+
+      <!-- Glass Form Card -->
+      <div class="form-card" id="form-card">
+        <form id="lead-form" novalidate>
+          <!-- Full Name -->
+          <div class="form-group" id="group-name">
+            <label class="form-label" for="input-name">Full Name</label>
+            <div class="form-input-wrapper">
+              <input
+                type="text"
+                class="form-input"
+                id="input-name"
+                name="name"
+                placeholder="e.g. Rahul Sharma"
+                required
+                autocomplete="name"
+                maxlength="80"
+              >
+            </div>
+            <div class="form-error" id="error-name" role="alert"></div>
+          </div>
+
+          <!-- Email Address -->
+          <div class="form-group" id="group-email">
+            <label class="form-label" for="input-email">Email Address</label>
+            <div class="form-input-wrapper">
+              <input
+                type="email"
+                class="form-input"
+                id="input-email"
+                name="email"
+                placeholder="e.g. rahul@example.com"
+                required
+                autocomplete="email"
+                maxlength="120"
+              >
+            </div>
+            <div class="form-error" id="error-email" role="alert"></div>
+          </div>
+
+          <!-- Property Area -->
+          <div class="form-group" id="group-area">
+            <label class="form-label" for="input-area">Property Area / Locality</label>
+            <div class="form-input-wrapper">
+              <input
+                type="text"
+                class="form-input"
+                id="input-area"
+                name="area"
+                placeholder="e.g. Whitefield, Bangalore"
+                required
+                maxlength="100"
+              >
+            </div>
+            <div class="form-error" id="error-area" role="alert"></div>
+          </div>
+
+          <!-- Property Price -->
+          <div class="form-group" id="group-price">
+            <label class="form-label" for="input-price">Property Budget</label>
+            <div class="input-with-prefix">
+              <span class="input-prefix">₹</span>
+              <input
+                type="number"
+                class="form-input"
+                id="input-price"
+                name="price"
+                placeholder="e.g. 7500000"
+                required
+                min="1"
+                step="1"
+              >
+            </div>
+            <div class="form-error" id="error-price" role="alert"></div>
+          </div>
+
+          <!-- Submit Button -->
+          <button type="submit" class="btn-submit" id="btn-submit">
+            <span class="btn-text">Submit Inquiry</span>
+          </button>
+        </form>
+
+        <!-- Success Overlay -->
+        <div class="success-overlay" id="success-overlay">
+          <div class="success-checkmark">
+            <svg viewBox="0 0 24 24">
+              <polyline points="4 12 10 18 20 6"></polyline>
+            </svg>
+          </div>
+          <h2>Inquiry Submitted!</h2>
+          <p>Thank you! Our agent will contact you shortly.</p>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <footer class="form-footer">
+        <p>Your data is secure &amp; confidential. Powered by <strong>PropCRM</strong></p>
+      </footer>
+    </div>
+  </main>
+
+  <!-- Toast Container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/form.js"></script>
+</body>
+</html>

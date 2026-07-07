@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Generated files
+package-lock.json
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor files
+.vscode/
+.idea/
+
+# PDF generator (dev tool, not needed in production)
+generate_pdfs.js

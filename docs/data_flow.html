@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Flow Architecture — PropCRM</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --primary: #1B5E20;
+    --primary-light: #4CAF50;
+    --accent: #E8F5E9;
+    --bg: #FFFFFF;
+    --text: #1a1a1a;
+    --text-muted: #555;
+    --border: #E0E0E0;
+    --header-bg: #1B5E20;
+    --header-text: #FFFFFF;
+    --flow-bg: #F7F9F7;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Inter', -apple-system, sans-serif;
+    font-size: 11pt;
+    line-height: 1.7;
+    color: var(--text);
+    background: var(--bg);
+  }
+
+  @page { size: A4; margin: 20mm 18mm 25mm 18mm; }
+
+  @media print {
+    body { font-size: 10pt; }
+    .page-break { page-break-before: always; }
+    .no-break { page-break-inside: avoid; }
+    .cover { page-break-after: always; }
+  }
+
+  .cover {
+    display: flex; flex-direction: column; justify-content: center;
+    align-items: center; min-height: 90vh; text-align: center; padding: 60px 40px;
+  }
+  .cover .logo-bar { width: 80px; height: 6px; background: var(--primary); border-radius: 3px; margin-bottom: 40px; }
+  .cover h1 { font-size: 32pt; font-weight: 700; color: var(--primary); margin-bottom: 8px; }
+  .cover .subtitle { font-size: 14pt; color: var(--text-muted); margin-bottom: 50px; }
+  .cover .doc-type { font-size: 13pt; font-weight: 600; color: var(--primary); text-transform: uppercase; letter-spacing: 3px; margin-bottom: 60px; }
+  .cover .meta-table { width: 360px; border-collapse: collapse; text-align: left; }
+  .cover .meta-table td { padding: 8px 16px; font-size: 10pt; border-bottom: 1px solid #eee; }
+  .cover .meta-table td:first-child { font-weight: 600; color: var(--text-muted); width: 140px; }
+  .cover .confidential { margin-top: 60px; font-size: 8.5pt; color: #999; text-transform: uppercase; letter-spacing: 2px; }
+
+  .content { max-width: 780px; margin: 0 auto; padding: 40px 20px; }
+
+  h2 { font-size: 18pt; font-weight: 700; color: var(--primary); margin-top: 40px; margin-bottom: 16px; padding-bottom: 8px; border-bottom: 2px solid var(--primary); }
+  h3 { font-size: 13pt; font-weight: 600; color: #333; margin-top: 28px; margin-bottom: 10px; }
+  h4 { font-size: 11pt; font-weight: 600; color: var(--primary); margin-top: 20px; margin-bottom: 8px; }
+  p { margin-bottom: 12px; }
+  ul, ol { margin: 8px 0 16px 24px; }
+  li { margin-bottom: 6px; }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0 24px 0; font-size: 10pt; }
+  th { background: var(--header-bg); color: var(--header-text); font-weight: 600; text-align: left; padding: 10px 14px; font-size: 9.5pt; text-transform: uppercase; letter-spacing: 0.5px; }
+  td { padding: 9px 14px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  tr:nth-child(even) { background: #FAFAFA; }
+
+  code { background: #f4f4f4; padding: 2px 6px; border-radius: 3px; font-size: 9.5pt; font-family: 'Courier New', monospace; }
+
+  .flow-box {
+    background: var(--flow-bg);
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 24px;
+    margin: 20px 0;
+  }
+
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 16px;
+    position: relative;
+  }
+
+  .flow-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 18px;
+    top: 38px;
+    bottom: -16px;
+    width: 2px;
+    background: var(--primary-light);
+  }
+
+  .step-number {
+    width: 36px;
+    height: 36px;
+    background: var(--primary);
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 13pt;
+    flex-shrink: 0;
+    margin-right: 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .step-content { flex: 1; padding-top: 4px; }
+  .step-content strong { display: block; margin-bottom: 4px; color: #333; }
+  .step-content .step-detail { font-size: 10pt; color: var(--text-muted); }
+
+  .entity-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 16px 0;
+    border-left: 4px solid var(--primary);
+  }
+  .entity-card h4 { margin-top: 0; }
+
+  .callout {
+    padding: 16px 20px;
+    border-left: 4px solid var(--primary);
+    background: var(--accent);
+    border-radius: 0 6px 6px 0;
+    margin: 16px 0;
+    font-size: 10pt;
+  }
+
+  .callout-warning {
+    border-left-color: #F57C00;
+    background: #FFF3E0;
+  }
+
+  .callout-error {
+    border-left-color: #C62828;
+    background: #FFEBEE;
+  }
+
+  .endpoint-box {
+    background: #f9f9f9;
+    border: 1px solid #e0e0e0;
+    border-radius: 6px;
+    padding: 16px;
+    margin: 12px 0;
+    font-family: 'Courier New', monospace;
+    font-size: 9.5pt;
+  }
+
+  .method-badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 4px;
+    font-size: 8.5pt;
+    font-weight: 700;
+    margin-right: 8px;
+    font-family: 'Courier New', monospace;
+  }
+
+  .method-post { background: #E8F5E9; color: #2E7D32; }
+  .method-get { background: #E3F2FD; color: #1565C0; }
+
+  .footer-note {
+    margin-top: 60px; padding-top: 16px; border-top: 1px solid #ddd;
+    font-size: 8.5pt; color: #999; text-align: center;
+  }
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover">
+  <div class="logo-bar"></div>
+  <h1>PropCRM</h1>
+  <p class="subtitle">Lead Management System for Real Estate Agents</p>
+  <p class="doc-type">Data Flow Architecture Document</p>
+  <table class="meta-table">
+    <tr><td>Document Version</td><td>1.0</td></tr>
+    <tr><td>Date</td><td>July 7, 2026</td></tr>
+    <tr><td>Status</td><td>Draft — Pending Approval</td></tr>
+    <tr><td>Author</td><td>Product Engineering Team</td></tr>
+    <tr><td>Related Document</td><td>PRD v1.0</td></tr>
+  </table>
+  <p class="confidential">Confidential — Internal Use Only</p>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+<h2>1. System Architecture Overview</h2>
+<p>PropCRM follows a <strong>three-tier architecture</strong> with clear separation between the presentation layer (GitHub Pages), application layer (Google Apps Script), and data layer (Google Sheets). All communication between tiers occurs over HTTPS using JSON payloads.</p>
+
+<h3>1.1 Architecture Layers</h3>
+<table>
+  <thead><tr><th>Layer</th><th>Component</th><th>Technology</th><th>Responsibility</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Presentation</strong></td><td>Lead Form</td><td>HTML/CSS/JS (GitHub Pages)</td><td>Lead data capture, client-side validation, UX feedback</td></tr>
+    <tr><td><strong>Presentation</strong></td><td>Agent Dashboard</td><td>HTML/CSS/JS + Chart.js (GitHub Pages)</td><td>Lead management, analytics visualization, email actions</td></tr>
+    <tr><td><strong>Application</strong></td><td>API Gateway</td><td>Google Apps Script (Web App)</td><td>Request routing, server-side validation, business logic, email orchestration</td></tr>
+    <tr><td><strong>Data</strong></td><td>Lead Store</td><td>Google Sheets — "Leads" sheet</td><td>Persistent storage of all lead records</td></tr>
+    <tr><td><strong>Data</strong></td><td>Config Store</td><td>Google Sheets — "AgentConfig" sheet</td><td>Agent settings, API keys, authentication PIN</td></tr>
+    <tr><td><strong>External</strong></td><td>Email Service</td><td>Brevo v3 REST API</td><td>Transactional email delivery</td></tr>
+  </tbody>
+</table>
+
+<h3>1.2 Communication Protocols</h3>
+<table>
+  <thead><tr><th>Path</th><th>Protocol</th><th>Format</th><th>Auth</th></tr></thead>
+  <tbody>
+    <tr><td>Frontend → Apps Script</td><td>HTTPS (fetch API)</td><td>JSON</td><td>PIN in request body (dashboard only)</td></tr>
+    <tr><td>Apps Script → Google Sheets</td><td>SpreadsheetApp (native)</td><td>Internal</td><td>Script owner's Google account</td></tr>
+    <tr><td>Apps Script → Brevo</td><td>HTTPS (UrlFetchApp)</td><td>JSON</td><td>API key in header</td></tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- 2. Data Entities & Schema -->
+<h2>2. Data Entities &amp; Schema</h2>
+
+<div class="entity-card">
+  <h4>Entity: Lead</h4>
+  <p>Represents a single property inquiry submitted by a customer.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type</th><th>Source</th><th>Constraints</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>id</code></td><td>String</td><td>System-generated</td><td>Unique, non-null</td><td>UUID v4 identifier</td></tr>
+      <tr><td><code>name</code></td><td>String</td><td>User input</td><td>Min 2 chars, alphabetic + spaces</td><td>Full name of the lead</td></tr>
+      <tr><td><code>email</code></td><td>String</td><td>User input</td><td>Valid email format (RFC 5322)</td><td>Contact email</td></tr>
+      <tr><td><code>area</code></td><td>String</td><td>User input</td><td>Non-empty, max 100 chars</td><td>Property locality/area name</td></tr>
+      <tr><td><code>price</code></td><td>Number</td><td>User input</td><td>Positive integer, > 0</td><td>Property budget in ₹</td></tr>
+      <tr><td><code>priceBracket</code></td><td>String (Enum)</td><td>Computed</td><td>One of 6 predefined brackets</td><td>Auto-classified price range</td></tr>
+      <tr><td><code>submittedAt</code></td><td>DateTime</td><td>System-generated</td><td>ISO 8601 format</td><td>Timestamp of form submission</td></tr>
+      <tr><td><code>contacted</code></td><td>Boolean</td><td>Agent action</td><td>Default: FALSE</td><td>Whether agent has followed up</td></tr>
+      <tr><td><code>contactedAt</code></td><td>DateTime</td><td>System-generated</td><td>Nullable</td><td>When contacted was set to TRUE</td></tr>
+      <tr><td><code>emailSentToLead</code></td><td>Boolean</td><td>System-generated</td><td>Default: FALSE</td><td>Acknowledgment email status</td></tr>
+      <tr><td><code>reminderSentToAgent</code></td><td>Boolean</td><td>System-generated</td><td>Default: FALSE</td><td>Whether reminder was sent for this lead</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="entity-card">
+  <h4>Entity: AgentConfig (Singleton)</h4>
+  <p>System configuration for the agent. Single row in the "AgentConfig" sheet.</p>
+  <table>
+    <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+    <tbody>
+      <tr><td><code>agentName</code></td><td>String</td><td>Agent's display name (used in email templates)</td></tr>
+      <tr><td><code>agentEmail</code></td><td>String</td><td>Agent's email for receiving notifications</td></tr>
+      <tr><td><code>brevoApiKey</code></td><td>String</td><td>Brevo API key for sending emails</td></tr>
+      <tr><td><code>dashboardPin</code></td><td>String</td><td>PIN for dashboard authentication</td></tr>
+      <tr><td><code>reminderHours</code></td><td>Number</td><td>Hours before reminder trigger (default: 1)</td></tr>
+    </tbody>
+  </table>
+</div>
+
+<div class="page-break"></div>
+
+<!-- 3. API Endpoints -->
+<h2>3. API Endpoints</h2>
+
+<h3>3.1 Base URL</h3>
+<div class="endpoint-box">
+  https://script.google.com/macros/s/{DEPLOYMENT_ID}/exec
+</div>
+
+<h3>3.2 POST — Submit Lead</h3>
+<div class="endpoint-box">
+  <span class="method-badge method-post">POST</span> /exec
+</div>
+<table>
+  <thead><tr><th>Field</th><th>Detail</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Action</strong></td><td><code>"submitLead"</code></td></tr>
+    <tr><td><strong>Request Body</strong></td><td><code>{ "action": "submitLead", "name": "Rahul Sharma", "email": "rahul@example.com", "area": "Whitefield", "price": 7500000 }</code></td></tr>
+    <tr><td><strong>Success Response</strong></td><td><code>{ "success": true, "id": "a1b2c3d4-...", "message": "Lead saved successfully" }</code></td></tr>
+    <tr><td><strong>Error Response</strong></td><td><code>{ "success": false, "errors": ["Invalid email format", "Price must be a positive number"] }</code></td></tr>
+    <tr><td><strong>Side Effects</strong></td><td>1) Row written to Leads sheet &nbsp; 2) Acknowledgment email sent to lead &nbsp; 3) Notification email sent to agent</td></tr>
+  </tbody>
+</table>
+
+<h3>3.3 POST — Verify PIN</h3>
+<div class="endpoint-box">
+  <span class="method-badge method-post">POST</span> /exec
+</div>
+<table>
+  <thead><tr><th>Field</th><th>Detail</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Action</strong></td><td><code>"verifyPin"</code></td></tr>
+    <tr><td><strong>Request Body</strong></td><td><code>{ "action": "verifyPin", "pin": "1234" }</code></td></tr>
+    <tr><td><strong>Success</strong></td><td><code>{ "success": true, "agentName": "Rahul" }</code></td></tr>
+    <tr><td><strong>Failure</strong></td><td><code>{ "success": false, "error": "Invalid PIN" }</code></td></tr>
+  </tbody>
+</table>
+
+<h3>3.4 POST — Update Contacted Status</h3>
+<div class="endpoint-box">
+  <span class="method-badge method-post">POST</span> /exec
+</div>
+<table>
+  <thead><tr><th>Field</th><th>Detail</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Action</strong></td><td><code>"updateContacted"</code></td></tr>
+    <tr><td><strong>Request Body</strong></td><td><code>{ "action": "updateContacted", "pin": "1234", "id": "a1b2c3d4-...", "contacted": true }</code></td></tr>
+    <tr><td><strong>Success</strong></td><td><code>{ "success": true }</code></td></tr>
+    <tr><td><strong>Side Effects</strong></td><td>Updates <code>contacted</code> to TRUE and sets <code>contactedAt</code> to current timestamp</td></tr>
+  </tbody>
+</table>
+
+<h3>3.5 POST — Send Email to Lead</h3>
+<div class="endpoint-box">
+  <span class="method-badge method-post">POST</span> /exec
+</div>
+<table>
+  <thead><tr><th>Field</th><th>Detail</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Action</strong></td><td><code>"sendEmailToLead"</code></td></tr>
+    <tr><td><strong>Request Body</strong></td><td><code>{ "action": "sendEmailToLead", "pin": "1234", "id": "a1b2c3d4-..." }</code></td></tr>
+    <tr><td><strong>Success</strong></td><td><code>{ "success": true, "message": "Email sent" }</code></td></tr>
+    <tr><td><strong>Side Effects</strong></td><td>Follow-up email sent to lead via Brevo</td></tr>
+  </tbody>
+</table>
+
+<h3>3.6 GET — Fetch All Leads &amp; Stats</h3>
+<div class="endpoint-box">
+  <span class="method-badge method-get">GET</span> /exec?action=getLeads&amp;pin=1234
+</div>
+<table>
+  <thead><tr><th>Field</th><th>Detail</th></tr></thead>
+  <tbody>
+    <tr><td><strong>Query Params</strong></td><td><code>action=getLeads</code>, <code>pin=XXXX</code></td></tr>
+    <tr><td><strong>Success Response</strong></td><td>JSON object containing: <code>leads[]</code> (all lead records), <code>stats</code> (computed metrics), <code>priceBrackets</code> (chart data), <code>areaCounts</code> (chart data)</td></tr>
+    <tr><td><strong>Auth Failure</strong></td><td><code>{ "success": false, "error": "Invalid PIN" }</code></td></tr>
+  </tbody>
+</table>
+
+<div class="page-break"></div>
+
+<!-- 4. Data Flow Scenarios -->
+<h2>4. Data Flow Scenarios</h2>
+
+<h3>4.1 Flow 1: Lead Submission (Happy Path)</h3>
+<p><strong>Trigger:</strong> Customer clicks "Submit" on the lead form</p>
+<div class="flow-box">
+  <div class="flow-step">
+    <div class="step-number">1</div>
+    <div class="step-content">
+      <strong>Client-Side Validation</strong>
+      <span class="step-detail">Browser validates all fields (name length, email format, area non-empty, price > 0). If invalid → show inline errors, halt submission.</span>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-number">2</div>
+    <div class="step-content">
+      <strong>HTTP POST to Apps Script</strong>
+      <span class="step-detail">Form data sent as JSON via <code>fetch()</code> to the Apps Script Web App URL. Submit button shows loading spinner.</span>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-number">3</div>
+    <div class="step-content">
+      <strong>Server-Side Validation</strong>
+      <span class="step-detail">Apps Script re-validates all fields server-side. If invalid → returns <code>{ success: false, errors: [...] }</code>.</span>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-number">4</div>
+    <div class="step-content">
+      <strong>Generate Lead Record</strong>
+      <span class="step-detail">System generates UUID, calculates price bracket, captures timestamp. Constructs complete lead record.</span>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-number">5</div>
+    <div class="step-content">
+      <strong>Write to Google Sheets</strong>
+      <span class="step-detail">Appends new row to the "Leads" sheet with all 11 columns. Default values: <code>contacted = FALSE</code>, <code>emailSentToLead = FALSE</code>, <code>reminderSentToAgent = FALSE</code>.</span>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-number">6</div>
+    <div class="step-content">
+      <strong>Send Acknowledgment Email to Lead</strong>
+      <span class="step-detail">Apps Script reads Brevo API key from AgentConfig, sends acknowledgment email to the lead's email via Brevo v3 API. Updates <code>emailSentToLead = TRUE</code>.</span>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-number">7</div>
+    <div class="step-content">
+      <strong>Send Notification Email to Agent</strong>
+      <span class="step-detail">Apps Script sends a notification email to the agent's email (from AgentConfig) with the lead's details.</span>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-number">8</div>
+    <div class="step-content">
+      <strong>Return Success Response</strong>
+      <span class="step-detail">Apps Script returns <code>{ success: true, id: "..." }</code>. Frontend shows success toast, resets form.</span>
+    </div>
+  </div>
+</div>
+
+<h3>4.2 Flow 2: Dashboard Data Load</h3>
+<p><strong>Trigger:</strong> Agent opens dashboard and enters correct PIN</p>
+<div class="flow-box">
+  <div class="flow-step">
+    <div class="step-number">1</div>
+    <div class="step-content">
+      <strong>PIN Verification</strong>
+      <span class="step-detail">Agent enters PIN → POST to Apps Script with <code>action: "verifyPin"</code>. On success, PIN is stored in session memory (JavaScript variable). On failure, error message shown.</span>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-number">2</div>
+    <div class="step-content">
+      <strong>Fetch Leads Data</strong>
+      <span class="step-detail">GET request to Apps Script with <code>action=getLeads&pin=XXXX</code>. Apps Script verifies PIN, reads all rows from "Leads" sheet.</span>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-number">3</div>
+    <div class="step-content">
+      <strong>Compute Statistics (Server-Side)</strong>
+      <span class="step-detail">Apps Script computes: total leads, contacted count, uncontacted count, contacted %, average price, price bracket distribution (count per bracket), area distribution (count per locality).</span>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-number">4</div>
+    <div class="step-content">
+      <strong>Return Aggregated Response</strong>
+      <span class="step-detail">Returns JSON with <code>leads[]</code>, <code>stats{}</code>, <code>priceBrackets{}</code>, <code>areaCounts{}</code>.</span>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-number">5</div>
+    <div class="step-content">
+      <strong>Render Dashboard</strong>
+      <span class="step-detail">Frontend populates: stat cards, Chart.js doughnut chart (price brackets), Chart.js bar chart (area distribution), leads data table. Green gradient colors applied based on data concentration.</span>
+    </div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<h3>4.3 Flow 3: Mark Lead as Contacted</h3>
+<p><strong>Trigger:</strong> Agent checks the "Contacted" checkbox on a lead row</p>
+<div class="flow-box">
+  <div class="flow-step">
+    <div class="step-number">1</div>
+    <div class="step-content">
+      <strong>Checkbox Toggle Event</strong>
+      <span class="step-detail">JavaScript captures change event on the checkbox for the specific lead row.</span>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-number">2</div>
+    <div class="step-content">
+      <strong>POST Update Request</strong>
+      <span class="step-detail">Sends <code>{ action: "updateContacted", id: "...", contacted: true, pin: "..." }</code> to Apps Script.</span>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-number">3</div>
+    <div class="step-content">
+      <strong>Update Google Sheet</strong>
+      <span class="step-detail">Apps Script finds the row by ID, sets <code>contacted = TRUE</code> and <code>contactedAt = NOW()</code>.</span>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-number">4</div>
+    <div class="step-content">
+      <strong>UI Confirmation</strong>
+      <span class="step-detail">Frontend updates the row visually (e.g., reduced opacity or green highlight) and updates stat cards.</span>
+    </div>
+  </div>
+</div>
+
+<h3>4.4 Flow 4: Send Follow-up Email from Dashboard</h3>
+<p><strong>Trigger:</strong> Agent clicks "Send Email" button on a lead row</p>
+<div class="flow-box">
+  <div class="flow-step">
+    <div class="step-number">1</div>
+    <div class="step-content">
+      <strong>Button Click Event</strong>
+      <span class="step-detail">Agent clicks "Send Email" → button changes to loading state.</span>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-number">2</div>
+    <div class="step-content">
+      <strong>POST Email Request</strong>
+      <span class="step-detail">Sends <code>{ action: "sendEmailToLead", id: "...", pin: "..." }</code> to Apps Script.</span>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-number">3</div>
+    <div class="step-content">
+      <strong>Apps Script Processes Email</strong>
+      <span class="step-detail">Reads lead data by ID from Sheets, reads agent config (name, Brevo key), constructs follow-up email HTML, sends via Brevo API.</span>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-number">4</div>
+    <div class="step-content">
+      <strong>UI Confirmation</strong>
+      <span class="step-detail">Button shows ✓ checkmark with "Sent" text. Reverts to normal after 3 seconds.</span>
+    </div>
+  </div>
+</div>
+
+<h3>4.5 Flow 5: Automated Reminder for Uncontacted Leads</h3>
+<p><strong>Trigger:</strong> Time-driven trigger (runs every 1 hour automatically in Apps Script)</p>
+<div class="flow-box">
+  <div class="flow-step">
+    <div class="step-number">1</div>
+    <div class="step-content">
+      <strong>Scheduled Trigger Fires</strong>
+      <span class="step-detail">Google Apps Script time-driven trigger executes <code>checkUncontactedLeads()</code> every 1 hour.</span>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-number">2</div>
+    <div class="step-content">
+      <strong>Query Uncontacted Leads</strong>
+      <span class="step-detail">Reads "Leads" sheet. Filters for rows where: <code>contacted = FALSE</code> AND <code>reminderSentToAgent = FALSE</code> AND <code>submittedAt</code> is more than <code>reminderHours</code> ago.</span>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-number">3</div>
+    <div class="step-content">
+      <strong>Send Reminder Emails</strong>
+      <span class="step-detail">For each qualifying lead, sends a reminder email to the agent via Brevo with lead details and urgency message.</span>
+    </div>
+  </div>
+  <div class="flow-step">
+    <div class="step-number">4</div>
+    <div class="step-content">
+      <strong>Update Reminder Flag</strong>
+      <span class="step-detail">Sets <code>reminderSentToAgent = TRUE</code> for each processed lead to prevent duplicate reminders.</span>
+    </div>
+  </div>
+</div>
+
+<div class="page-break"></div>
+
+<!-- 5. Data Security & Privacy -->
+<h2>5. Data Security &amp; Privacy</h2>
+
+<h3>5.1 Sensitive Data Handling</h3>
+<table>
+  <thead><tr><th>Data Item</th><th>Classification</th><th>Storage</th><th>Protection</th></tr></thead>
+  <tbody>
+    <tr><td>Brevo API Key</td><td>Secret</td><td>AgentConfig sheet (cell C1)</td><td>Never sent to frontend; accessed only by Apps Script server-side</td></tr>
+    <tr><td>Dashboard PIN</td><td>Secret</td><td>AgentConfig sheet (cell D1)</td><td>Verified server-side; not stored in browser localStorage</td></tr>
+    <tr><td>Lead Email</td><td>PII</td><td>Leads sheet</td><td>Accessible only via authenticated dashboard (PIN required)</td></tr>
+    <tr><td>Lead Name</td><td>PII</td><td>Leads sheet</td><td>Same as above</td></tr>
+  </tbody>
+</table>
+
+<h3>5.2 Security Controls</h3>
+<table>
+  <thead><tr><th>Control</th><th>Implementation</th></tr></thead>
+  <tbody>
+    <tr><td>Transport encryption</td><td>All communication over HTTPS (enforced by GitHub Pages and Apps Script)</td></tr>
+    <tr><td>API key protection</td><td>Brevo API key stored in Sheets, accessed only via Apps Script backend</td></tr>
+    <tr><td>Input sanitization</td><td>HTML entities escaped, script tags stripped before writing to Sheets</td></tr>
+    <tr><td>Authentication</td><td>PIN verified on every dashboard API call (passed in request body/query)</td></tr>
+    <tr><td>Rate limiting</td><td>Inherent via Google Apps Script execution quotas (30 concurrent)</td></tr>
+  </tbody>
+</table>
+
+<div class="callout callout-warning">
+  <strong>⚠ Security Limitation (v1):</strong> PIN-based authentication is suitable for single-agent use but is not enterprise-grade. The PIN is sent in request bodies over HTTPS, which is encrypted in transit but could be observed in browser developer tools. For multi-agent or sensitive deployments, upgrading to Google OAuth is recommended in v2.
+</div>
+
+<!-- 6. Error Handling -->
+<h2>6. Error Handling Strategy</h2>
+
+<table>
+  <thead><tr><th>Error Scenario</th><th>Detection</th><th>Response</th><th>User Impact</th></tr></thead>
+  <tbody>
+    <tr>
+      <td>Client-side validation failure</td>
+      <td>Before API call</td>
+      <td>Inline error messages on form fields</td>
+      <td>Form not submitted; user corrects errors</td>
+    </tr>
+    <tr>
+      <td>Server-side validation failure</td>
+      <td>Apps Script validation</td>
+      <td>Returns <code>{ success: false, errors: [...] }</code></td>
+      <td>Error toast shown; form data preserved</td>
+    </tr>
+    <tr>
+      <td>Google Sheets write failure</td>
+      <td>Try-catch in Apps Script</td>
+      <td>Returns <code>{ success: false, error: "Storage error" }</code></td>
+      <td>Error toast; user asked to retry</td>
+    </tr>
+    <tr>
+      <td>Brevo API failure (email not sent)</td>
+      <td>HTTP response status check</td>
+      <td>Lead still saved; email flag stays FALSE; logged for retry</td>
+      <td>Lead captured (no data loss); email delivery delayed</td>
+    </tr>
+    <tr>
+      <td>Network failure (frontend → Apps Script)</td>
+      <td>Fetch catch block</td>
+      <td>Error toast: "Network error. Please check your connection."</td>
+      <td>Form data preserved; user retries</td>
+    </tr>
+    <tr>
+      <td>Invalid PIN on dashboard</td>
+      <td>PIN verification endpoint</td>
+      <td>Returns <code>{ success: false }</code></td>
+      <td>Error message; login form remains visible</td>
+    </tr>
+    <tr>
+      <td>Apps Script quota exceeded</td>
+      <td>Google error response</td>
+      <td>HTTP 429 or error message</td>
+      <td>Temporary unavailability; retry after cooldown</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="callout">
+  <strong>Design Principle:</strong> Email failures are non-blocking. The lead is always saved first. Email sending is a best-effort secondary action. If Brevo fails, the lead data is still safely stored in Google Sheets and visible on the dashboard.
+</div>
+
+<!-- 7. Data Transformation -->
+<h2>7. Data Transformations</h2>
+
+<h3>7.1 Price Bracket Calculation</h3>
+<p>Performed server-side in Apps Script when a new lead is submitted:</p>
+<table>
+  <thead><tr><th>Input Price (₹)</th><th>Bracket Output</th></tr></thead>
+  <tbody>
+    <tr><td>0 – 24,99,999</td><td>"Under 25L"</td></tr>
+    <tr><td>25,00,000 – 49,99,999</td><td>"25L – 50L"</td></tr>
+    <tr><td>50,00,000 – 99,99,999</td><td>"50L – 1Cr"</td></tr>
+    <tr><td>1,00,00,000 – 1,99,99,999</td><td>"1Cr – 2Cr"</td></tr>
+    <tr><td>2,00,00,000 – 4,99,99,999</td><td>"2Cr – 5Cr"</td></tr>
+    <tr><td>≥ 5,00,00,000</td><td>"5Cr+"</td></tr>
+  </tbody>
+</table>
+
+<h3>7.2 Statistics Aggregation</h3>
+<p>Computed in Apps Script on every dashboard data fetch (GET request):</p>
+<table>
+  <thead><tr><th>Stat</th><th>Computation</th><th>Output Format</th></tr></thead>
+  <tbody>
+    <tr><td>Total Leads</td><td><code>COUNT(all rows)</code></td><td>Integer</td></tr>
+    <tr><td>Contacted Count</td><td><code>COUNT(WHERE contacted = TRUE)</code></td><td>Integer</td></tr>
+    <tr><td>Uncontacted Count</td><td><code>Total - Contacted</code></td><td>Integer</td></tr>
+    <tr><td>Contacted %</td><td><code>(Contacted / Total) × 100</code></td><td>Percentage (1 decimal)</td></tr>
+    <tr><td>Average Price</td><td><code>SUM(price) / COUNT</code></td><td>₹ formatted</td></tr>
+    <tr><td>Price Distribution</td><td><code>GROUP BY priceBracket → COUNT</code></td><td>Object: { bracket: count }</td></tr>
+    <tr><td>Area Distribution</td><td><code>GROUP BY area (case-insensitive) → COUNT</code></td><td>Object: { area: count }, sorted desc</td></tr>
+  </tbody>
+</table>
+
+<h3>7.3 Chart Color Mapping (Green Gradient)</h3>
+<p>Applied on the frontend when rendering Chart.js charts:</p>
+<table>
+  <thead><tr><th>Concentration Level</th><th>Color</th><th>Hex</th></tr></thead>
+  <tbody>
+    <tr><td>Lowest (bottom 16%)</td><td>Pale Green</td><td>#E8F5E9</td></tr>
+    <tr><td>Low (16–33%)</td><td>Light Green</td><td>#C8E6C9</td></tr>
+    <tr><td>Medium-Low (33–50%)</td><td>Medium Light Green</td><td>#A5D6A7</td></tr>
+    <tr><td>Medium-High (50–66%)</td><td>Medium Green</td><td>#81C784</td></tr>
+    <tr><td>High (66–83%)</td><td>Dark Green</td><td>#4CAF50</td></tr>
+    <tr><td>Highest (top 16%)</td><td>Deep Green</td><td>#2E7D32</td></tr>
+  </tbody>
+</table>
+
+<div class="footer-note">
+  PropCRM — Data Flow Architecture Document v1.0 &nbsp;|&nbsp; Confidential — Internal Use Only &nbsp;|&nbsp; July 2026
+</div>
+
+</div>
+</body>
+</html>
