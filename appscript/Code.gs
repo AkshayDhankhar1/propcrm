@@ -127,7 +127,7 @@ function formatPrice(price) {
 function sendBrevoEmail(apiKey, toEmail, toName, subject, htmlContent, senderName, senderEmail) {
   const url = 'https://api.brevo.com/v3/smtp/email';
   const payload = {
-    sender: { name: senderName || 'PropCRM', email: 'akshay.dhankhar.ji@gmail' },
+    sender: { name: senderName || 'PropCRM', email: 'akshay.dhankhar.ji@gmail.com' },
     to: [{ email: toEmail, name: toName || '' }],
     subject: subject,
     htmlContent: htmlContent,
